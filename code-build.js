@@ -119,7 +119,7 @@ function buildSdk() {
 
   assert(
     codeBuild.config.credentials && cloudWatchLogs.config.credentials,
-    "No credentials. Try adding @aws-actions/configure-aws-credentials"
+    "No credentials. Try adding @aws-actions/configure-aws-credentials earlier in your job to set up AWS credentials."
   );
 
   return { codeBuild, cloudWatchLogs };
