@@ -1,0 +1,27 @@
+{
+  "name": "aws-codebuild-run-project",
+  "version": "0.1.0",
+  "description": "Execute CodeBuild::startBuild for the current repo.",
+  "main": "index.js",
+  "scripts": {
+    "lint": "prettier -c *.js test/*.js; eslint **.js test/**.js",
+    "package": "ncc build index.js -o dist",
+    "test": "mocha"
+  },
+  "author": "aws-crypto-tools-team@amazon.com",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@actions/core": "^1.2.1",
+    "@actions/exec": "^1.0.3",
+    "@actions/github": "^2.0.1",
+    "aws-sdk": "^2.601.0"
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.21.0",
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.9.0",
+    "mocha": "^7.0.0",
+    "prettier": "^1.19.1"
+  }
+}
