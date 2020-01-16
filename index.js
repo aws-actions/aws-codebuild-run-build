@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 const core = require("@actions/core");
-const { startBuild } = require("./code-build");
+const { buildProject } = require("./code-build");
 
 /* istanbul ignore next */
 if (require.main === module) {
@@ -13,7 +13,7 @@ module.exports = run;
 
 async function run() {
   try {
-    await startBuild();
+    await buildProject();
   } catch (error) {
     core.setFailed(error.message);
   }

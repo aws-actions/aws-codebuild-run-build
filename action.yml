@@ -10,7 +10,7 @@ inputs:
   buildspec-override:
     description: 'Buildspec Override'
     required: false
-  env-vars:
+  env-passthrough:
     description: 'Comma separated list of environment variables to send to CodeBuild'
     required: false
 runs:

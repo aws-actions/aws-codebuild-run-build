@@ -96,14 +96,14 @@ describe("inputs2Parameters", () => {
     expect(() => inputs2Parameters()).to.throw();
   });
 
-  it("can send env-vars", () => {
+  it("can send env-passthrough", () => {
     // This is how GITHUB injects its input values.
     // It would be nice if there was an easy way to test this...
     process.env[`INPUT_PROJECT-NAME`] = projectName;
     process.env[`GITHUB_REPOSITORY`] = repoInfo;
     process.env[`GITHUB_SHA`] = sha;
 
-    process.env[`INPUT_ENV-VARS`] = `one, two 
+    process.env[`INPUT_ENV-PASSTHROUGH`] = `one, two 
     , three,
     four    `;
 

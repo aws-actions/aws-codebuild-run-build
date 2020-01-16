@@ -7,25 +7,25 @@ const aws = require("aws-sdk");
 const assert = require("assert");
 
 module.exports = {
-  startBuild,
-  _startBuild,
+  buildProject,
+  _buildProject,
   waitForBuildEndTime,
   inputs2Parameters,
   buildSdk,
   logName
 };
 
-function startBuild() {
+function buildProject() {
   // get a codeBuild instance from the SDK
   const sdk = buildSdk();
 
   // Get input options for startBuild
   const params = inputs2Parameters();
 
-  return _startBuild(sdk, params);
+  return _buildProject(sdk, params);
 }
 
-async function _startBuild(sdk, params) {
+async function _buildProject(sdk, params) {
   // Start the build
   const start = await sdk.codeBuild.startBuild(params).promise();
 
@@ -88,7 +88,7 @@ function inputs2Parameters() {
     core.getInput("buildspec-override", { required: false }) || undefined;
 
   const envVars = core
-    .getInput("env-vars", { required: false })
+    .getInput("env-passthrough", { required: false })
     .split(",")
 
     .map(i => i.trim());
@@ -98,7 +98,7 @@ function inputs2Parameters() {
     .map(([name, value]) => ({ name, value, type: "PLAINTEXT" }));
 
   // The idempotencyToken is intentionally not set.
-  // This way the GitHub events can manage the build.
+  // This way the GitHub events can manage the builds.
   return {
     projectName,
     sourceVersion,
