@@ -97,7 +97,8 @@ function inputs2Parameters() {
     .filter(([key]) => key.startsWith("GITHUB_") || envVars.includes(key))
     .map(([name, value]) => ({ name, value, type: "PLAINTEXT" }));
 
-  //     idempotencyToken is not set on purpose
+  // The idempotencyToken is intentionally not set.
+  // This way the GitHub events can manage the build.
   return {
     projectName,
     sourceVersion,

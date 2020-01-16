@@ -96,7 +96,7 @@ describe("inputs2Parameters", () => {
     expect(() => inputs2Parameters()).to.throw();
   });
 
-  it("wtf", () => {
+  it("can send env-vars", () => {
     // This is how GITHUB injects its input values.
     // It would be nice if there was an easy way to test this...
     process.env[`INPUT_PROJECT-NAME`] = projectName;
