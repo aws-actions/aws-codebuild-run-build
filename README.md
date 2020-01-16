@@ -30,7 +30,7 @@ A very simple example:
 A more complicated example
 
 ```yaml
-    - name: Start CodeBuild
+    - name: Run CodeBuild
       uses: aws-actions/aws-codebuild-run-project@v1
       with:
         project-name: CodeBuildProjectName
