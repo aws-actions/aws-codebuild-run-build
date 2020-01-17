@@ -58,7 +58,7 @@ and the flexibility of AWS CodeBuild.
 
 * Size
 
-The largest instance is 2 cores 7 GB RAM.
+Available resources are limited to 2 cores 7 GB RAM.
 For extremely large builds massive parallelization can return results faster.
 CodeBuild can offer up to 72 vCPUs.
 * Architecture
