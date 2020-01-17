@@ -21,7 +21,7 @@ the `sourceVersion`, `sourceTypeOverride`, `sourceLocationOverride` options are 
 A very simple example:
 
 ```yaml
-    - name: Run CodeBuild
+    - name: Start CodeBuild
       uses: aws-actions/aws-codebuild-run-project@v1
       with:
         project-name: CodeBuildProjectName
@@ -30,7 +30,7 @@ A very simple example:
 A more complicated example
 
 ```yaml
-    - name: Run CodeBuild
+    - name: Start CodeBuild
       uses: aws-actions/aws-codebuild-run-project@v1
       with:
         project-name: CodeBuildProjectName
