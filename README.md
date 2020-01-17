@@ -66,7 +66,7 @@ CodeBuild can offer up to 72 vCPUs and 144GB RAM.
 CodeBuild supports ARM and GPU containers.
 * Security
 
-There may be assets, configuration, or access that is restricted from GitHub.
+There may be assets, configuration, or access that is not accessible from GitHub.
 
 This action does not wrap every option of CodeBuild::StartBuild.
 This is intentional.
