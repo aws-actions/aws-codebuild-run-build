@@ -1,0 +1,18 @@
+name: '"AWS CodeBuild run project" Action For GitHub Actions'
+description: 'Execute CodeBuild::startBuild for the current repo.'
+branding:
+  icon: 'cloud'
+  color: 'orange'
+inputs:
+  project-name:
+    description: 'AWS CodeBuild Project Name'
+    required: true
+  buildspec-override:
+    description: 'Buildspec Override'
+    required: false
+  env-passthrough:
+    description: 'Comma separated list of environment variables to send to CodeBuild'
+    required: false
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
