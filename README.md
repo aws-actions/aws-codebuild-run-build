@@ -60,7 +60,7 @@ and the flexibility of AWS CodeBuild.
 
 Available resources are limited to 2 cores 7 GB RAM.
 For extremely large builds massive parallelization can return results faster.
-CodeBuild can offer up to 72 vCPUs.
+CodeBuild can offer up to 72 vCPUs and 144GB RAM.
 * Architecture
 
 CodeBuild supports ARM and GPU containers.
