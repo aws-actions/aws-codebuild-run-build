@@ -78,7 +78,7 @@ In a complicated case getting the values to pass to the action
 seems complicated if we are to handle every eventuality.
 
 With this in mind,
-we chose to focus on starting a build
+we chose to focus on running a build
 with configured similarly to `actions/checkout@v2`.
 Monitoring this build's CloudWatchLog and reporting progress as it happens,
 and when the build completes succeeding or failing based on the build's status.
