@@ -1,20 +1,9 @@
-## "AWS CodeBuild Run Project" Action For GitHub Actions
+## "AWS CodeBuild Run Build" Action For GitHub Actions
 
-For a CodeBuild project `startBuild` from GitHub Actions.
-Forward the CloudWatch log to GitHub.
-Wait for completion and error on anything but a `SUCCEEDED` build.
-
-The started build will have all the `GITHUB_` [environment variables](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables).
-In addition a comma separated list of configured environment variables.
-
-Regardless of the project configuration in CodeBuild,
-the `sourceVersion`, `sourceTypeOverride`, `sourceLocationOverride` options are set as follows:
-
-| CodeBuild value | GitHub value |
-| ------------- |-------------|
-| `sourceVersion` | The environment variable: `GITHUB_SHA` |
-| `sourceTypeOverride` | The string `'GITHUB'` |
-| `sourceLocationOverride` | The `HTTPS` git url for `context.repo`|
+CodeBuild is a fully managed build service.
+Building a project from GitHub Actions should be easy.
+Adding this action to your workflow will run a build in CodeBuild
+and report the results as if it ran in GitHub Actions.
 
 ## Usage
 
@@ -49,7 +38,7 @@ A more complicated example
 
 See [action.yml](action.yml) for the full documentation for this action's inputs and outputs.
 
-## Implementation notes on intention
+## Intention and implementation notes
 
 GitHub actions help configure source management with events.
 However, there are a few limitations.
@@ -68,6 +57,28 @@ CodeBuild supports ARM and GPU containers.
 
 There may be assets, configuration, or access that is not accessible from GitHub.
 
+To accomplish this goal
+we chose to focus on running a build for a single repository.
+The CodeBuild `startBuild` is called,
+with source parameters out similarly to `actions/checkout@v2`.
+The action waits for the build to complete
+while logging from the build CloudWatchLog.
+This action will succeed on a build status of `SUCCEEDED`
+and fail for everything else.
+The build's status is the same as this actions status.
+
+The started build will have all the `GITHUB_` [environment variables](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables).
+In addition a comma separated list of configured environment variables.
+
+Regardless of the project configuration in CodeBuild,
+the `sourceVersion`, `sourceTypeOverride`, `sourceLocationOverride` options are set as follows:
+
+| CodeBuild value | GitHub value |
+| ------------- |-------------|
+| `sourceVersion` | The environment variable: `GITHUB_SHA` |
+| `sourceTypeOverride` | The string `'GITHUB'` |
+| `sourceLocationOverride` | The `HTTPS` git url for `context.repo`|
+
 This action does not wrap every option of CodeBuild::StartBuild.
 This is intentional.
 To implement every CodeBuild option,
@@ -76,12 +87,8 @@ This would increase the cognitive load to use the action.
 In a standard case would create a lot of boilerplate configuration.
 In a complicated case getting the values to pass to the action
 seems complicated if we are to handle every eventuality.
-
-With this in mind,
-we chose to focus on running a build
-with configured similarly to `actions/checkout@v2`.
-Monitoring this build's CloudWatchLog and reporting progress as it happens,
-and when the build completes succeeding or failing based on the build's status.
+Since all inputs for GitHub Actions are flat environment variables,
+we did not want to force people hand write JSON to configure the action.
 
 ## License
 
