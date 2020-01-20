@@ -87,7 +87,7 @@ This would required a lot of boilerplate configuration for standard cases
 and would be a complex maintenance burden to support all complex cases
 because of the limitations of GitHub Actions input values.
 Since all inputs for GitHub Actions are flat environment variables,
-we did not want to force people hand write JSON to configure the action.
+we did not want to force people to hand write JSON in order to configure the action.
 If you find that the options we provide do not meet your needs, let us know with an issue.
 
 ## License
