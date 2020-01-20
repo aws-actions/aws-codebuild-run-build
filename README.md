@@ -83,7 +83,9 @@ This is intentional.
 To implement every CodeBuild option,
 would require a way to configure each option.
 This would increase the cognitive load to use the action.
-In a standard case would create a lot of boilerplate configuration.
+This would required a lot of boilerplate configuration for standard cases
+and would be a complex maintenance burden to support all complex cases
+because of the limitations of GitHub Actions input values.
 In a complicated case getting the values to pass to the action
 seems complicated if we are to handle every eventuality.
 Since all inputs for GitHub Actions are flat environment variables,
