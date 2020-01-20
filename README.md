@@ -86,7 +86,6 @@ This would increase the cognitive load to use the action.
 This would required a lot of boilerplate configuration for standard cases
 and would be a complex maintenance burden to support all complex cases
 because of the limitations of GitHub Actions input values.
-seems complicated if we are to handle every eventuality.
 Since all inputs for GitHub Actions are flat environment variables,
 we did not want to force people hand write JSON to configure the action.
 
