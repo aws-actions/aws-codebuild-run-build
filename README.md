@@ -65,7 +65,6 @@ The action waits for the build to complete
 while logging everything written to the build's CloudWatch Logs logstream.
 This action will succeed on a build status of `SUCCEEDED`
 and fail for everything else.
-The build's status is the same as this actions status.
 
 The started build will have all the `GITHUB_` [environment variables](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables).
 In addition a comma separated list of configured environment variables.
