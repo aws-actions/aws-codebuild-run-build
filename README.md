@@ -67,7 +67,7 @@ This action will succeed on a build status of `SUCCEEDED`
 and fail for everything else.
 
 When we start the build, we pass through all `GITHUB_` [environment variables](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables) present in the Action environment.
-In addition a comma separated list of configured environment variables.
+You can also use the `evn-passthrough` input value to specify a comma-separated list of the names of additional environment variables that you want to pass through.
 
 Regardless of the project configuration in CodeBuild,
 the `sourceVersion`, `sourceTypeOverride`, `sourceLocationOverride` options are set as follows:
