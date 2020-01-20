@@ -74,7 +74,7 @@ the `sourceVersion`, `sourceTypeOverride`, `sourceLocationOverride` options are 
 
 | CodeBuild value | GitHub value |
 | ------------- |-------------|
-| `sourceVersion` | The environment variable: `GITHUB_SHA` |
+| `sourceVersion` | The commit that triggered the workflow |
 | `sourceTypeOverride` | The string `'GITHUB'` |
 | `sourceLocationOverride` | The `HTTPS` git url for `context.repo`|
 
