@@ -66,7 +66,7 @@ while logging everything written to the build's CloudWatch Logs logstream.
 This action will succeed on a build status of `SUCCEEDED`
 and fail for everything else.
 
-The started build will have all the `GITHUB_` [environment variables](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables).
+When we start the build, we pass through all `GITHUB_` [environment variables](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables) present in the Action environment.
 In addition a comma separated list of configured environment variables.
 
 Regardless of the project configuration in CodeBuild,
