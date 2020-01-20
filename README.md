@@ -62,7 +62,7 @@ we chose to focus on running a build for a single repository.
 The CodeBuild `startBuild` is called,
 checking out the commit that triggered the workflow.
 The action waits for the build to complete
-while logging from the build CloudWatchLog.
+while logging everything written to the build's CloudWatch Logs logstream.
 This action will succeed on a build status of `SUCCEEDED`
 and fail for everything else.
 The build's status is the same as this actions status.
