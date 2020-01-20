@@ -60,7 +60,7 @@ There may be assets, configuration, or access that is not accessible from GitHub
 To accomplish this goal
 we chose to focus on running a build for a single repository.
 The CodeBuild `startBuild` is called,
-with source parameters out similarly to `actions/checkout@v2`.
+checking out the commit that triggered the workflow.
 The action waits for the build to complete
 while logging from the build CloudWatchLog.
 This action will succeed on a build status of `SUCCEEDED`
