@@ -30,13 +30,7 @@ async function _buildProject(sdk, params) {
   const start = await sdk.codeBuild.startBuild(params).promise();
 
   // Wait for the build to "complete"
-  const build = await waitForBuildEndTime(sdk, start.build);
-
-  // Signal the outcome
-  assert(
-    build.buildStatus === "SUCCEEDED",
-    `Build status: ${build.buildStatus}`
-  );
+  return waitForBuildEndTime(sdk, start.build);
 }
 
 async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {

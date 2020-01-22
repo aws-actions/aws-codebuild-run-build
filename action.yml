@@ -13,6 +13,9 @@ inputs:
   env-passthrough:
     description: 'Comma separated list of environment variables to send to CodeBuild'
     required: false
+outputs:
+  aws-build-id:
+    description: 'The AWS CodeBuild Build ID for this build.'
 runs:
   using: 'node12'
   main: 'dist/index.js'
