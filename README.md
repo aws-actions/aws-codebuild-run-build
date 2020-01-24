@@ -40,7 +40,7 @@ See [action.yml](action.yml) for the full documentation for this action's inputs
 
 ## Intention and implementation notes
 
-GitHub actions help configure source management with events.
+GitHub Actions help configure source management with events.
 However, there are a few limitations.
 The intention of this action is to give you the power of GitHub Actions,
 and the flexibility of AWS CodeBuild.
@@ -50,9 +50,11 @@ and the flexibility of AWS CodeBuild.
 Available resources are limited to 2 cores 7 GB RAM.
 For extremely large builds massive parallelization can return results faster.
 CodeBuild can offer up to 72 vCPUs and 144GB RAM.
+
 * Architecture
 
 CodeBuild supports ARM and GPU containers.
+
 * Security
 
 There may be assets, configuration, or access that is not accessible from GitHub.
@@ -66,8 +68,11 @@ while logging everything written to the build's CloudWatch Logs logstream.
 This action will succeed on a build status of `SUCCEEDED`
 and fail for everything else.
 
-When we start the build, we pass through all `GITHUB_` [environment variables](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables) present in the Action environment.
-You can also use the `evn-passthrough` input value to specify a comma-separated list of the names of additional environment variables that you want to pass through.
+When we start the build,
+we pass through all `GITHUB_` [environment variables][github environment variables] present in the Action environment.
+You can also use the `evn-passthrough` input value
+to specify a comma-separated list of the names of additional environment variables
+that you want to pass through.
 
 Regardless of the project configuration in CodeBuild,
 the `sourceVersion`, `sourceTypeOverride`, `sourceLocationOverride` options are set as follows:
@@ -78,7 +83,7 @@ the `sourceVersion`, `sourceTypeOverride`, `sourceLocationOverride` options are 
 | `sourceTypeOverride` | The string `'GITHUB'` |
 | `sourceLocationOverride` | The `HTTPS` git url for `context.repo`|
 
-This action does not wrap every option of CodeBuild::StartBuild.
+This action does not wrap every option of [CodeBuild::StartBuild][codebuild-startbuild].
 This is intentional.
 To implement every CodeBuild option,
 we would have to provide a way to configure every option.
@@ -94,4 +99,7 @@ If you find that the options we provide do not meet your needs, let us know with
 
 This SDK is distributed under the
 [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0),
-see LICENSE.txt and NOTICE.txt for more information.
+see LICENSE and NOTICE for more information.
+
+[github environment variables]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables
+[codebuild-startbuild]: https://docs.aws.amazon.com/codebuild/latest/APIReference/API_StartBuild.html
