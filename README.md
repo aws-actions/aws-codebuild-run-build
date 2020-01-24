@@ -81,8 +81,8 @@ the `sourceVersion`, `sourceTypeOverride`, `sourceLocationOverride` options are 
 This action does not wrap every option of CodeBuild::StartBuild.
 This is intentional.
 To implement every CodeBuild option,
-would require a way to configure each option.
-This would increase the cognitive load to use the action.
+we would have to provide a way to configure every option.
+The more complex configuration would make using the action more work for you.
 This would required a lot of boilerplate configuration for standard cases
 and would be a complex maintenance burden to support all complex cases
 because of the limitations of GitHub Actions input values.
