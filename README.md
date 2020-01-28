@@ -1,13 +1,64 @@
-## "AWS CodeBuild Run Build" Action For GitHub Actions
+## AWS CodeBuild Run Build for GitHub Actions
 
-CodeBuild is a fully managed build service.
-Building a project from GitHub Actions should be easy.
-Adding this action to your workflow will run a build in CodeBuild
-and report the results as if it ran in GitHub Actions.
+This action enables you to run an [AWS CodeBuild][codebuild] [Project][codebuild project]
+as a step in a GitHub Actions workflow job.
+
+We execute a Project build and collect the logs from that build,
+printing them in realtime.
+Our goal is for this to appear to the user no different
+than if the logic was being executed on the GitHub Actions job runner.
 
 ## Usage
 
-A very simple example:
+### Inputs
+
+This action offers three inputs that you can use to configure its behavior:
+
+1. **project-name** (required) : The CodeBuild Project that you want to run.
+1. **buildspec-override** (optional) :
+    The location, in this repository, of a [buildspec file][codebuild buildspec] to require CodeBuild to use.
+    The default behavior is to use the buidspec file location that you configured in the CodeBuild Project.
+1. **env-passthrough** (optional) :
+    A comma-separated list of environment variables to pass through
+    from the GitHub Actions environment to the CodeBuild execution environment.
+
+## Purpose
+
+GitHub Actions provides a powerful system of event-based workflows
+but the hosted job runners do have some restrictions
+that might limit how you can use GitHub Actions for your project.
+
+[AWS CodeBuild][codebuild] is an execution platform in the AWS cloud
+that can give you much more flexibility in where your logic executes.
+
+The goal of this action is to give you the power of GitHub Actions
+with the flexibility of AWS CodeBuild.
+
+### Resources and Architecture
+
+[GitHub Actions job runners][github actions job runners] have 2 x86_64 CPU cores and 7 GB RAM.
+
+This is plenty for a lot of common activities
+but some large or complex builds need more resources,
+and some builds need access to special CPU architectures or hardware.
+
+[CodeBuild compute types][codebuild compute types] offer options with up to
+72 x86_64 vCPUs,
+255 GB RAM,
+8 ARM64 vCPUs,
+or GPU hardware devices.
+
+### Access
+
+Your workflow might require access to assets, configuration, or resources
+that are impossible, difficult, or simply expensive
+to access from GitHub's hosted job runners
+but are easy or cheap to access from CodeBuild.
+
+### Examples
+
+If your CodeBuild Project has everything already configured how you want it,
+all you need to do is provide the project name.
 
 ```yaml
     - name: Start CodeBuild
@@ -16,7 +67,8 @@ A very simple example:
         project-name: CodeBuildProjectName
 ```
 
-A more complicated example
+You might want to reuse a project across multiple jobs or repositories.
+In that case, you probably want to provide a bit more configuration.
 
 ```yaml
     - name: Start CodeBuild
@@ -25,47 +77,25 @@ A more complicated example
         project-name: CodeBuildProjectName
         buildspec-override: path/to/buildspec.yaml
         env-passthrough: |
-          additional,
-          variables,
-          define,
-          code
+          custom,
+          requester,
+          event-name
       env:
-        additional: environment
-        variables: to
-        define: in
-        code: build
+        custom: my environment variable
+        requester: ${{ github.actor }}
+        event-name: ${{ github.event_name }}
 ```
 
-See [action.yml](action.yml) for the full documentation for this action's inputs and outputs.
+## Implementation Notes
 
-## Intention and implementation notes
+### What we did
 
-GitHub Actions help configure source management with events.
-However, there are a few limitations.
-The intention of this action is to give you the power of GitHub Actions,
-and the flexibility of AWS CodeBuild.
-
-* Size
-
-Available resources are limited to 2 cores 7 GB RAM.
-For extremely large builds massive parallelization can return results faster.
-CodeBuild can offer up to 72 vCPUs and 144GB RAM.
-
-* Architecture
-
-CodeBuild supports ARM and GPU containers.
-
-* Security
-
-There may be assets, configuration, or access that is not accessible from GitHub.
-
-To accomplish this goal
-we chose to focus on running a build for a single repository.
-The CodeBuild `startBuild` is called,
+We call the CodeBuild `startBuild` API,
 checking out the commit that triggered the workflow.
 The action waits for the build to complete
-while logging everything written to the build's CloudWatch Logs logstream.
-This action will succeed on a build status of `SUCCEEDED`
+while logging everything written to the build's
+[Amazon CloudWatch Logs][cloudwatch logs] [logstream][cloudwatch logs concepts].
+The action will then succeed on a build status of `SUCCEEDED`
 and fail for everything else.
 
 When we start the build,
@@ -75,24 +105,31 @@ to specify a comma-separated list of the names of additional environment variabl
 that you want to pass through.
 
 Regardless of the project configuration in CodeBuild,
-the `sourceVersion`, `sourceTypeOverride`, `sourceLocationOverride` options are set as follows:
+the `sourceVersion`, `sourceTypeOverride`, and `sourceLocationOverride` options are set as follows:
 
-| CodeBuild value | GitHub value |
-| ------------- |-------------|
-| `sourceVersion` | The commit that triggered the workflow |
-| `sourceTypeOverride` | The string `'GITHUB'` |
-| `sourceLocationOverride` | The `HTTPS` git url for `context.repo`|
+| CodeBuild value          | GitHub value                           |
+|--------------------------|----------------------------------------|
+| `sourceVersion`          | The commit that triggered the workflow |
+| `sourceTypeOverride`     | The string `'GITHUB'`                  |
+| `sourceLocationOverride` | The `HTTPS` git url for `context.repo` |
 
-This action does not wrap every option of [CodeBuild::StartBuild][codebuild-startbuild].
-This is intentional.
-To implement every CodeBuild option,
-we would have to provide a way to configure every option.
-The more complex configuration would make using the action more work for you.
-This would required a lot of boilerplate configuration for standard cases
-and would be a complex maintenance burden to support all complex cases
-because of the limitations of GitHub Actions input values.
-Since all inputs for GitHub Actions are flat environment variables,
-we did not want to force people to hand write JSON in order to configure the action.
+### What we did not do
+
+This action intentionally does not wrap every option of [CodeBuild::StartBuild][codebuild startbuild].
+
+Because all GitHub Actions input values are passed through environment variables,
+they must be simple strings.
+This makes it difficult to pass complex structures through these inputs.
+Providing inputs for all possible parameters in the `StartBuild` API
+would have required adding significant complexity
+either through adding many more inputs
+or through requiring that all values be passed in a stringified form
+and hoping that all reasonable configurations fit within
+the limits of environment variable length.
+
+For this reason, and to simplify what we expect to be the most common use-cases,
+we chose to start with the simplest possible configuration that we could come up with.
+
 If you find that the options we provide do not meet your needs, let us know with an issue.
 
 ## License
@@ -101,5 +138,13 @@ This SDK is distributed under the
 [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0),
 see LICENSE and NOTICE for more information.
 
+[codebuild]: https://docs.aws.amazon.com/codebuild/latest/userguide/welcome.html
+[codebuild project]: https://docs.aws.amazon.com/codebuild/latest/userguide/working-with-build-projects.html
+[codebuild startbuild]: https://docs.aws.amazon.com/codebuild/latest/APIReference/API_StartBuild.html
+[codebuild compute types]: https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-compute-types.html
+[codebuild buildspec]: https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html
+[cloudwatch logs]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html
+[cloudwatch logs concepts]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatchLogsConcepts.html
+
 [github environment variables]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables
-[codebuild-startbuild]: https://docs.aws.amazon.com/codebuild/latest/APIReference/API_StartBuild.html
+[github actions job runners]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/virtual-environments-for-github-hosted-runners#supported-runners-and-hardware-resources
