@@ -17,7 +17,7 @@ This action offers three inputs that you can use to configure its behavior:
     The location, in this repository, of a [buildspec file][codebuild buildspec] to require CodeBuild to use.
     By default, the action uses the buildspec file location that you configured in the CodeBuild project.
 1. **env-passthrough** (optional) :
-    A comma-separated list of environment variables to pass through
+    A comma-separated list of environment variables that is passed
     from the GitHub Actions environment to the CodeBuild execution environment.
 
 ## Purpose
