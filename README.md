@@ -13,7 +13,7 @@ The user experience is the same as it would be if the logic were executed in the
 This action offers three inputs that you can use to configure its behavior:
 
 1. **project-name** (required) : The CodeBuild project that you want to run.
-    Note: Because of the way CodeBuild handles environment variables,
+    Note: Because we always pass through environment variables,
     any variables set in the project will be overridden.
 1. **buildspec-override** (optional) :
     The location, in this repository, of a [buildspec file][codebuild buildspec] to require CodeBuild to use.
