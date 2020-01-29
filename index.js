@@ -3,6 +3,7 @@
 
 const core = require("@actions/core");
 const { buildProject } = require("./code-build");
+const assert = require("assert");
 
 /* istanbul ignore next */
 if (require.main === module) {
@@ -13,7 +14,14 @@ module.exports = run;
 
 async function run() {
   try {
-    await buildProject();
+    const build = await buildProject();
+    core.setOutput("aws-build-id", build.id);
+
+    // Signal the outcome
+    assert(
+      build.buildStatus === "SUCCEEDED",
+      `Build status: ${build.buildStatus}`
+    );
   } catch (error) {
     core.setFailed(error.message);
   }
