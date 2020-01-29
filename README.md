@@ -36,7 +36,7 @@ with the flexibility of AWS CodeBuild.
 
 [GitHub Actions job runners][github actions job runners] have 2 x86_64 CPU cores and 7 GB RAM.
 
-This is plenty for a lot of common activities
+This is enough for the most common activities, 
 but some large or complex builds need more resources,
 and some builds need access to special CPU architectures or hardware.
 
