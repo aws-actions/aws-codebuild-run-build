@@ -22,15 +22,15 @@ This action offers three inputs that you can use to configure its behavior:
 
 ## Purpose
 
+This action is designed to give you the power of GitHub Actions
+with options for more CPU and memory, and access to other resources.
+
 GitHub Actions provides a powerful system of event-based workflows
 but the hosted job runners have some restrictions
 that might limit how you can use GitHub Actions for your project.
 
 [AWS CodeBuild][codebuild] is an execution platform in the AWS cloud
 that can give you much more flexibility in where your logic executes.
-
-This action is designed to give you the power of GitHub Actions
-with the flexibility of AWS CodeBuild.
 
 ### Resources and Architecture
 
@@ -40,11 +40,12 @@ This is enough for the most common activities,
 but some large or complex builds need more resources,
 and some builds need access to special CPU architectures or hardware.
 
-[CodeBuild compute types][codebuild compute types] offer options with up to
-72 x86_64 vCPUs,
-255 GB RAM,
-8 ARM64 vCPUs,
-or GPU hardware devices.
+[CodeBuild compute types][codebuild compute types] offer options including:
+
+* up to 72 x86_64 vCPUs
+* up to 255 GB RAM
+* up to 8 ARM64 vCPUs
+* GPU hardware devices
 
 ### Access
 
