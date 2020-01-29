@@ -14,7 +14,7 @@ This action offers three inputs that you can use to configure its behavior:
 
 1. **project-name** (required) : The CodeBuild project that you want to run.
 1. **buildspec-override** (optional) :
-    The location, in this repository, of a [buildspec file][codebuild buildspec] to require CodeBuild to use.
+    The location in this repository of a [buildspec file][codebuild buildspec] that CodeBuild is required to use.
     The default behavior is to use the buidspec file location that you configured in the CodeBuild project.
 1. **env-passthrough** (optional) :
     A comma-separated list of environment variables to pass through
