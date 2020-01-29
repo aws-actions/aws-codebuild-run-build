@@ -29,7 +29,7 @@ that might limit how you can use GitHub Actions for your project.
 [AWS CodeBuild][codebuild] is an execution platform in the AWS cloud
 that can give you much more flexibility in where your logic executes.
 
-The goal of this action is to give you the power of GitHub Actions
+This action is designed to give you the power of GitHub Actions
 with the flexibility of AWS CodeBuild.
 
 ### Resources and Architecture
