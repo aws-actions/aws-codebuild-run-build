@@ -66,7 +66,7 @@ all you need to do is provide the project name.
 ```
 
 You might want to reuse a project across multiple jobs or repositories.
-In that case, you probably want to provide a bit more configuration.
+In that case, you probably want to provide a bit more configuration. For example:
 
 ```yaml
     - name: Start CodeBuild
