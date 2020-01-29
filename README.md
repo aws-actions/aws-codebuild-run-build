@@ -23,7 +23,7 @@ This action offers three inputs that you can use to configure its behavior:
 ## Purpose
 
 GitHub Actions provides a powerful system of event-based workflows
-but the hosted job runners do have some restrictions
+but the hosted job runners have some restrictions
 that might limit how you can use GitHub Actions for your project.
 
 [AWS CodeBuild][codebuild] is an execution platform in the AWS cloud
