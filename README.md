@@ -3,10 +3,8 @@
 This action enables you to run an [AWS CodeBuild][codebuild] [project][codebuild project]
 as a step in a GitHub Actions workflow job.
 
-We execute a project build and collect the logs from that build,
-printing them in realtime.
-Our goal is for this to appear to the user no different
-than if the logic was being executed on the GitHub Actions job runner.
+We build the project, collect the logs from that build, and print them as they are written.
+The user experience is the same as it would be if the logic were executed in the GitHub Actions job runner.
 
 ## Usage
 
