@@ -1,9 +1,9 @@
 ## AWS CodeBuild Run Build for GitHub Actions
 
-This action enables you to run an [AWS CodeBuild][codebuild] [Project][codebuild project]
+This action enables you to run an [AWS CodeBuild][codebuild] [project][codebuild project]
 as a step in a GitHub Actions workflow job.
 
-We execute a Project build and collect the logs from that build,
+We execute a project build and collect the logs from that build,
 printing them in realtime.
 Our goal is for this to appear to the user no different
 than if the logic was being executed on the GitHub Actions job runner.
@@ -14,10 +14,10 @@ than if the logic was being executed on the GitHub Actions job runner.
 
 This action offers three inputs that you can use to configure its behavior:
 
-1. **project-name** (required) : The CodeBuild Project that you want to run.
+1. **project-name** (required) : The CodeBuild project that you want to run.
 1. **buildspec-override** (optional) :
     The location, in this repository, of a [buildspec file][codebuild buildspec] to require CodeBuild to use.
-    The default behavior is to use the buidspec file location that you configured in the CodeBuild Project.
+    The default behavior is to use the buidspec file location that you configured in the CodeBuild project.
 1. **env-passthrough** (optional) :
     A comma-separated list of environment variables to pass through
     from the GitHub Actions environment to the CodeBuild execution environment.
@@ -57,7 +57,7 @@ but are easy or cheap to access from CodeBuild.
 
 ### Examples
 
-If your CodeBuild Project has everything already configured how you want it,
+If your CodeBuild project has everything already configured how you want it,
 all you need to do is provide the project name.
 
 ```yaml
