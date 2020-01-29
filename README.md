@@ -56,6 +56,10 @@ but are easy or cheap to access from CodeBuild.
 
 ### Examples
 
+These examples show how you can define a single step in a workflow job.
+For more information about GitHub Actions workflow syntax,
+see the [GitHub docs][github workflow syntax].
+
 If your CodeBuild project has everything already configured how you want it,
 all you need to do is provide the project name.
 
@@ -147,3 +151,4 @@ see LICENSE and NOTICE for more information.
 
 [github environment variables]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables
 [github actions job runners]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/virtual-environments-for-github-hosted-runners#supported-runners-and-hardware-resources
+[github workflow syntax]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
