@@ -76,7 +76,7 @@ that are impossible, difficult, or simply expensive
 to access from GitHub's hosted job runners
 but are easy or cheap to access from CodeBuild.
 
-### Examples
+## Examples
 
 These examples show how you can define a step in a workflow job.
 For more information about GitHub Actions workflow syntax,
