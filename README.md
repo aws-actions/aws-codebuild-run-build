@@ -1,38 +1,51 @@
 ## AWS CodeBuild Run Build for GitHub Actions
 
-This action enables you to run an [AWS CodeBuild][codebuild] [project][codebuild project]
+This action runs a [AWS CodeBuild][codebuild] [project][codebuild project]
 as a step in a GitHub Actions workflow job.
 
-We build the project, collect the logs from that build, and print them as they are written.
-The user experience is the same as it would be if the logic were executed in the GitHub Actions job runner.
+The action builds the CodeBuild project, collects the build logs, and prints them as they are written.
+The user experience is the same as it would be if the logic were executed in the GitHub Actions
+job runner.
 
 ## Usage
 
 ### Inputs
 
-This action offers three inputs that you can use to configure its behavior:
+This action offers three inputs that you can use to configure its behavior. The only
+required input is ``project-name``.
 
-1. **project-name** (required) : The CodeBuild project that you want to run.
-    Note: Because we always pass through environment variables,
-    any variables set in the project will be overridden.
+1. **project-name** (required) : The name of CodeBuild project you want to run.
 1. **buildspec-override** (optional) :
-    The location, in this repository, of a [buildspec file][codebuild buildspec] to require CodeBuild to use.
-    By default, the action uses the buildspec file location that you configured in the CodeBuild project.
+    The location (in this repository) of the [buildspec file][codebuild buildspec] that 
+    CodeBuild requires. By default, the action uses the buildspec file location that you configured
+    in the CodeBuild project.
 1. **env-passthrough** (optional) :
-    A comma-separated list of environment variables that is passed
-    from the GitHub Actions environment to the CodeBuild execution environment.
+    A comma-separated list of the names of environment variables that the action passes from GitHub 
+    Actions to CodeBuild. 
+
+    The action passes these environment variables to CodeBuild along with any environment variables
+    that have a `github` prefix.
+
+    This list is often the same or a subset of the list of environment variables
+    that you define for GitHub actions in the `env` property. 
+        
+    Note: If you specify an environment variable with the same name as one defined in your
+    CodeBuild project, the one defined here replaces the one in the CodeBuild project. For 
+    a list of CodeBuild environment variables, see 
 
 ## Purpose
 
-This action is designed to give you the power of GitHub Actions
-with options for more CPU and memory, and access to other resources.
+This action is designed to give you the power of GitHub Actions with options available 
+in [AWS CodeBuild][codebuild] for more CPU and memory, and access to other resources.
 
-GitHub Actions provides a powerful system of event-based workflows
-but the hosted job runners have some restrictions
-that might limit how you can use GitHub Actions for your project.
+GitHub Actions provides a powerful system of event-based workflows, but the hosted job 
+runners cannot exceed the defined computing and memory limits, and might prevent you
+from accessing resources that you need for your project.
 
-[AWS CodeBuild][codebuild] is an execution platform in the AWS cloud
-that can give you much more flexibility in where your logic executes.
+[AWS CodeBuild][codebuild] is a fully managed continuous integration service that compiles 
+source code, runs tests, and produces software packages that are ready to deploy. It supports
+more environment options than standard GitHub Actions, including a selection of powerful 
+computing environments with additional memory.
 
 ### Resources and Architecture
 
@@ -58,12 +71,12 @@ but are easy or cheap to access from CodeBuild.
 
 ### Examples
 
-These examples show how you can define a single step in a workflow job.
+These examples show how you can define a step in a workflow job.
 For more information about GitHub Actions workflow syntax,
 see the [GitHub docs][github workflow syntax].
 
-If your CodeBuild project has everything already configured how you want it,
-all you need to do is provide the project name.
+If your CodeBuild project is already configured the way you want it,
+the only CodeBuild Run input you need to provide is the project name. 
 
 ```yaml
     - name: Start CodeBuild
@@ -72,8 +85,13 @@ all you need to do is provide the project name.
         project-name: CodeBuildProjectName
 ```
 
-You might want to reuse a project in multiple jobs or repositories.
-In that case, you probably want to provide a bit more configuration. For example:
+If you reuse a project in multiple jobs or repositories, you might
+want to provide a bit more configuration. For example, the following 
+configuration specifies an alternate location for the buildspec file. 
+It also tells AWS CodeBuild Run Build to send all of the environment
+variables defined in the `env:` list to CodeBuild. If any of these
+environment variables are defined in the CodeBuild project, this will 
+overwrite them.
 
 ```yaml
     - name: Start CodeBuild
@@ -95,22 +113,20 @@ In that case, you probably want to provide a bit more configuration. For example
 
 ### What we did
 
-We call the CodeBuild `startBuild` API,
-checking out the commit that triggered the workflow.
-The action waits for the build to complete
-while logging everything written to the build's
+We call the [CodeBuild `StartBuild` API][codebuild startbuild], checking out
+the commit that triggered the workflow.
+
+The action waits for the build to complete while logging everything written to the build's
 [Amazon CloudWatch Logs][cloudwatch logs] [logstream][cloudwatch logs concepts].
-The action will then succeed on a build status of `SUCCEEDED`
-and fail for everything else.
+If the `buildStatus` value in the StartBuild response is `SUCCEEDED`, the action succeeds. 
+Otherwise, it fails.
 
-When we start the build,
-we pass through all `GITHUB_` [environment variables][github environment variables] present in the Action environment.
-You can also use the `evn-passthrough` input value
-to specify a comma-separated list of the names of additional environment variables
-that you want to pass through.
+In the call to StartBuild, we pass in all 
+`GITHUB_` [environment variables][github environment variables] in the GitHub Actions environment,
+plus any environment variables that you specified in the `evn-passthrough` input value.
 
-Regardless of the project configuration in CodeBuild,
-the `sourceVersion`, `sourceTypeOverride`, and `sourceLocationOverride` options are set as follows:
+Regardless of the project configuration in CodeBuild or GitHub Actions, we always pass the 
+following parameters and values to CodeBuild in the StartBuild API call.
 
 | CodeBuild value          | GitHub value                           |
 |--------------------------|----------------------------------------|
@@ -120,22 +136,21 @@ the `sourceVersion`, `sourceTypeOverride`, and `sourceLocationOverride` options 
 
 ### What we did not do
 
-This action intentionally does not wrap every option of [CodeBuild::StartBuild][codebuild startbuild].
+This action intentionally does not let you specify every option in the
+[CodeBuild::StartBuild][codebuild startbuild] API.
 
 Because all GitHub Actions input values are passed through environment variables,
-they must be simple strings.
-This makes it difficult to pass complex structures through these inputs.
-Providing inputs for all possible parameters in the `StartBuild` API
-would have required adding significant complexity
-either through adding many more inputs
-or through requiring that all values be passed in a stringified form
-and hoping that all reasonable configurations fit within
-the limits of environment variable length.
+they must be simple strings. This makes it difficult to pass complex structures 
+as inputs.
+
+Also, providing an input for every parameter in the `StartBuild` API
+would have made it much more difficult to use and maintain this tool. 
+We would have to add many more inputs or require string values, while hoping that all
+supported configurations conformed to the environment variable length limits.
 
 For this reason, and to simplify what we expect to be the most common use-cases,
-we chose to start with the simplest possible configuration that we could come up with.
-
-If you find that the options we provide do not meet your needs, let us know with an issue.
+we chose to start with the simplest possible configuration. If you find that these options 
+don't meet your needs, please open an issue to let us know.
 
 ## License
 
