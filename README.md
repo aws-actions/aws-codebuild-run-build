@@ -117,6 +117,28 @@ this will overwrite them.
     event-name: ${{ github.event_name }}
 ```
 
+### Running Locally
+
+It can be useful to run a build outside of CI.
+So, this action can also be installed locally
+to kick off a CodeBuild project from your git sandbox.
+You could push your changes to an open PR,
+but if you only want to test one project this may be faster.
+Running this way expects you to use git to select the
+commit you want to test (by checking it out).
+
+```
+npx @aws-actions/codebuild-run-build -p ProjectName -r remoteName
+```
+
+This will take the HEAD of the current git branch
+and push to a temporary branch in the specified remote.
+Then kick off the build
+and delete the remote branch when complete.
+
+You can also install the project globally or locally
+and execute it that way.
+
 ## Implementation Notes
 
 ### What we did
