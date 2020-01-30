@@ -86,7 +86,7 @@ If your CodeBuild project is already configured the way you want it,
 the only CodeBuild Run input you need to provide is the project name.
 
 ```yaml
-- name: Start CodeBuild
+- name: Run CodeBuild
   uses: aws-actions/aws-codebuild-run-project@v1
   with:
     project-name: CodeBuildProjectName
@@ -102,7 +102,7 @@ If any of these environment variables are defined in the CodeBuild project,
 this will overwrite them.
 
 ```yaml
-- name: Start CodeBuild
+- name: Run CodeBuild
   uses: aws-actions/aws-codebuild-run-project@v1
   with:
     project-name: CodeBuildProjectName
