@@ -12,28 +12,32 @@ in the GitHub Actions job runner.
 ### Inputs
 
 This action offers three inputs that you can use to configure its behavior.
-The only required input is ``project-name``.
+The only required input is `project-name`.
 
 1. **project-name** (required) : The name of CodeBuild project you want to run.
 1. **buildspec-override** (optional) :
-    The location (in this repository) of the [buildspec file][codebuild buildspec]
-    that CodeBuild requires.
-    By default, the action uses the buildspec file location
-    that you configured in the CodeBuild project.
+   The location (in this repository) of the [buildspec file][codebuild buildspec]
+   that CodeBuild requires.
+   By default, the action uses the buildspec file location
+   that you configured in the CodeBuild project.
 1. **env-passthrough** (optional) :
-    A comma-separated list of the names of environment variables
-    that the action passes from GitHub Actions to CodeBuild.
+   A comma-separated list of the names of environment variables
+   that the action passes from GitHub Actions to CodeBuild.
 
-    The action passes these environment variables to CodeBuild
-    along with any environment variables that have a `github` prefix.
+   The action passes these environment variables to CodeBuild
+   along with any environment variables that have a `github` prefix.
 
-    This list is often the same or a subset of the list of environment variables
-    that you define for GitHub actions in the `env` property.
+   This list is often the same or a subset of the list of environment variables
+   that you define for GitHub actions in the `env` property.
 
-    Note: If you specify an environment variable
-    with the same name as one defined in your CodeBuild project,
-    the one defined here replaces the one in the CodeBuild project.
-    For a list of CodeBuild environment variables, see
+   Note: If you specify an environment variable
+   with the same name as one defined in your CodeBuild project,
+   the one defined here replaces the one in the CodeBuild project.
+   For a list of CodeBuild environment variables, see
+
+### Outputs
+
+1. **aws-build-id** : The CodeBuild build ID of the build that the action ran.
 
 ## Purpose
 
@@ -60,10 +64,10 @@ and some builds need access to special CPU architectures or hardware.
 
 [CodeBuild compute types][codebuild compute types] offer options including:
 
-* up to 72 x86_64 vCPUs
-* up to 255 GB RAM
-* up to 8 ARM64 vCPUs
-* GPU hardware devices
+- up to 72 x86_64 vCPUs
+- up to 255 GB RAM
+- up to 8 ARM64 vCPUs
+- GPU hardware devices
 
 ### Access
 
@@ -82,10 +86,10 @@ If your CodeBuild project is already configured the way you want it,
 the only CodeBuild Run input you need to provide is the project name.
 
 ```yaml
-    - name: Start CodeBuild
-      uses: aws-actions/aws-codebuild-run-project@v1
-      with:
-        project-name: CodeBuildProjectName
+- name: Start CodeBuild
+  uses: aws-actions/aws-codebuild-run-project@v1
+  with:
+    project-name: CodeBuildProjectName
 ```
 
 If you reuse a project in multiple jobs or repositories,
@@ -98,19 +102,19 @@ If any of these environment variables are defined in the CodeBuild project,
 this will overwrite them.
 
 ```yaml
-    - name: Start CodeBuild
-      uses: aws-actions/aws-codebuild-run-project@v1
-      with:
-        project-name: CodeBuildProjectName
-        buildspec-override: path/to/buildspec.yaml
-        env-passthrough: |
-          custom,
-          requester,
-          event-name
-      env:
-        custom: my environment variable
-        requester: ${{ github.actor }}
-        event-name: ${{ github.event_name }}
+- name: Start CodeBuild
+  uses: aws-actions/aws-codebuild-run-project@v1
+  with:
+    project-name: CodeBuildProjectName
+    buildspec-override: path/to/buildspec.yaml
+    env-passthrough: |
+      custom,
+      requester,
+      event-name
+  env:
+    custom: my environment variable
+    requester: ${{ github.actor }}
+    event-name: ${{ github.event_name }}
 ```
 
 ## Implementation Notes
@@ -133,7 +137,7 @@ Regardless of the project configuration in CodeBuild or GitHub Actions,
 we always pass the following parameters and values to CodeBuild in the StartBuild API call.
 
 | CodeBuild value          | GitHub value                           |
-|--------------------------|----------------------------------------|
+| ------------------------ | -------------------------------------- |
 | `sourceVersion`          | The commit that triggered the workflow |
 | `sourceTypeOverride`     | The string `'GITHUB'`                  |
 | `sourceLocationOverride` | The `HTTPS` git url for `context.repo` |
@@ -170,7 +174,6 @@ see LICENSE and NOTICE for more information.
 [codebuild buildspec]: https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html
 [cloudwatch logs]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html
 [cloudwatch logs concepts]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatchLogsConcepts.html
-
 [github environment variables]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables
 [github actions job runners]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/virtual-environments-for-github-hosted-runners#supported-runners-and-hardware-resources
 [github workflow syntax]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
