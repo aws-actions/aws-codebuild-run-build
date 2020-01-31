@@ -137,9 +137,6 @@ describe("inputs2Parameters", () => {
     expect(test)
       .to.haveOwnProperty("buildspecOverride")
       .and.to.equal(undefined);
-    expect(test)
-      .to.haveOwnProperty("environmentVariablesOverride")
-      .and.to.have.lengthOf(2);
 
     // I send everything that starts 'GITHUB_'
     expect(test)
