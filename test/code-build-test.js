@@ -70,24 +70,31 @@ describe("inputs2Parameters", () => {
     // I send everything that starts 'GITHUB_'
     expect(test)
       .to.haveOwnProperty("environmentVariablesOverride")
-      .and.to.have.lengthOf(2);
-    expect(test.environmentVariablesOverride[0])
+      .and.to.have.lengthOf.greaterThan(1);
+
+    const [repoEnv] = test.environmentVariablesOverride.filter(
+      ({ name }) => name === "GITHUB_REPOSITORY"
+    );
+    expect(repoEnv)
       .to.haveOwnProperty("name")
       .and.to.equal("GITHUB_REPOSITORY");
-    expect(test.environmentVariablesOverride[0])
+    expect(repoEnv)
       .to.haveOwnProperty("value")
       .and.to.equal(repoInfo);
-    expect(test.environmentVariablesOverride[0])
+    expect(repoEnv)
       .to.haveOwnProperty("type")
       .and.to.equal("PLAINTEXT");
 
-    expect(test.environmentVariablesOverride[1])
+    const [shaEnv] = test.environmentVariablesOverride.filter(
+      ({ name }) => name === "GITHUB_SHA"
+    );
+    expect(shaEnv)
       .to.haveOwnProperty("name")
       .and.to.equal("GITHUB_SHA");
-    expect(test.environmentVariablesOverride[1])
+    expect(shaEnv)
       .to.haveOwnProperty("value")
       .and.to.equal(sha);
-    expect(test.environmentVariablesOverride[1])
+    expect(shaEnv)
       .to.haveOwnProperty("type")
       .and.to.equal("PLAINTEXT");
   });
@@ -116,45 +123,57 @@ describe("inputs2Parameters", () => {
 
     expect(test)
       .to.haveOwnProperty("environmentVariablesOverride")
-      .and.to.have.lengthOf(6);
+      .and.to.have.lengthOf.greaterThan(5);
 
-    expect(test.environmentVariablesOverride[2])
+    const [oneEnv] = test.environmentVariablesOverride.filter(
+      ({ name }) => name === "one"
+    );
+    expect(oneEnv)
       .to.haveOwnProperty("name")
       .and.to.equal("one");
-    expect(test.environmentVariablesOverride[2])
+    expect(oneEnv)
       .to.haveOwnProperty("value")
       .and.to.equal("_one_");
-    expect(test.environmentVariablesOverride[2])
+    expect(oneEnv)
       .to.haveOwnProperty("type")
       .and.to.equal("PLAINTEXT");
 
-    expect(test.environmentVariablesOverride[3])
+    const [twoEnv] = test.environmentVariablesOverride.filter(
+      ({ name }) => name === "two"
+    );
+    expect(twoEnv)
       .to.haveOwnProperty("name")
       .and.to.equal("two");
-    expect(test.environmentVariablesOverride[3])
+    expect(twoEnv)
       .to.haveOwnProperty("value")
       .and.to.equal("_two_");
-    expect(test.environmentVariablesOverride[3])
+    expect(twoEnv)
       .to.haveOwnProperty("type")
       .and.to.equal("PLAINTEXT");
 
-    expect(test.environmentVariablesOverride[4])
+    const [threeEnv] = test.environmentVariablesOverride.filter(
+      ({ name }) => name === "three"
+    );
+    expect(threeEnv)
       .to.haveOwnProperty("name")
       .and.to.equal("three");
-    expect(test.environmentVariablesOverride[4])
+    expect(threeEnv)
       .to.haveOwnProperty("value")
       .and.to.equal("_three_");
-    expect(test.environmentVariablesOverride[4])
+    expect(threeEnv)
       .to.haveOwnProperty("type")
       .and.to.equal("PLAINTEXT");
 
-    expect(test.environmentVariablesOverride[5])
+    const [fourEnv] = test.environmentVariablesOverride.filter(
+      ({ name }) => name === "four"
+    );
+    expect(fourEnv)
       .to.haveOwnProperty("name")
       .and.to.equal("four");
-    expect(test.environmentVariablesOverride[5])
+    expect(fourEnv)
       .to.haveOwnProperty("value")
       .and.to.equal("_four_");
-    expect(test.environmentVariablesOverride[5])
+    expect(fourEnv)
       .to.haveOwnProperty("type")
       .and.to.equal("PLAINTEXT");
   });

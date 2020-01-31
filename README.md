@@ -127,7 +127,7 @@ the only CodeBuild Run input you need to provide is the project name.
     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     aws-region: us-east-2
-- name: Start CodeBuild
+- name: Run CodeBuild
   uses: aws-actions/aws-codebuild-run-project@v1
   with:
     project-name: CodeBuildProjectName
@@ -149,7 +149,7 @@ this will overwrite them.
     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     aws-region: us-east-2
-- name: Start CodeBuild
+- name: Run CodeBuild
   uses: aws-actions/aws-codebuild-run-project@v1
   with:
     project-name: CodeBuildProjectName
