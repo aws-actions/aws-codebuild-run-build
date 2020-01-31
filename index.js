@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 const core = require("@actions/core");
-const { buildProject } = require("./code-build");
+const { runBuild } = require("./code-build");
 const assert = require("assert");
 
 /* istanbul ignore next */
@@ -14,7 +14,7 @@ module.exports = run;
 
 async function run() {
   try {
-    const build = await buildProject();
+    const build = await runBuild();
     core.setOutput("aws-build-id", build.id);
 
     // Signal the outcome

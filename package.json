@@ -15,8 +15,14 @@
     "@actions/core": "^1.2.1",
     "@actions/exec": "^1.0.3",
     "@actions/github": "^2.0.1",
-    "aws-sdk": "^2.601.0"
+    "aws-sdk": "^2.601.0",
+    "uuid": "^3.4.0",
+    "yargs": "^15.1.0"
   },
+  "bin": "./local.js",
+  "files": [
+    "*.js"
+  ],
   "devDependencies": {
     "@zeit/ncc": "^0.21.0",
     "chai": "^4.2.0",

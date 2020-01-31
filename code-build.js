@@ -7,27 +7,28 @@ const aws = require("aws-sdk");
 const assert = require("assert");
 
 module.exports = {
-  buildProject,
-  _buildProject,
+  runBuild,
+  build,
   waitForBuildEndTime,
   inputs2Parameters,
+  githubInputs,
   buildSdk,
   logName
 };
 
-async function buildProject() {
+async function runBuild() {
   // get a codeBuild instance from the SDK
   const sdk = buildSdk();
 
   // Get input options for startBuild
-  const params = inputs2Parameters();
+  const params = inputs2Parameters(githubInputs());
 
   console.log("*****STARTING CODEBUILD*****");
-  await _buildProject(sdk, params);
+  await build(sdk, params);
   console.log("*****CODEBUILD COMPLETE*****");
 }
 
-async function _buildProject(sdk, params) {
+async function build(sdk, params) {
   // Start the build
   const start = await sdk.codeBuild.startBuild(params).promise();
 
@@ -69,28 +70,49 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
   return waitForBuildEndTime(sdk, current, nextForwardToken);
 }
 
-function inputs2Parameters() {
+function githubInputs() {
   const projectName = core.getInput("project-name", { required: true });
-
+  const { owner, repo } = github.context.repo;
   // The github.context.sha is evaluated on import.
   // This makes it hard to test.
   // So I use the raw ENV
   const sourceVersion = process.env[`GITHUB_SHA`];
-  const sourceTypeOverride = "GITHUB";
-  const { owner, repo } = github.context.repo;
-  const sourceLocationOverride = `https://github.com/${owner}/${repo}.git`;
-
   const buildspecOverride =
     core.getInput("buildspec-override", { required: false }) || undefined;
 
-  const envVars = core
+  const envPassthrough = core
     .getInput("env-passthrough", { required: false })
     .split(",")
+    .map(i => i.trim())
+    .filter(i => i !== "");
 
-    .map(i => i.trim());
+  return {
+    projectName,
+    owner,
+    repo,
+    sourceVersion,
+    buildspecOverride,
+    envPassthrough
+  };
+}
+
+function inputs2Parameters(inputs) {
+  const {
+    projectName,
+    owner,
+    repo,
+    sourceVersion,
+    buildspecOverride,
+    envPassthrough = []
+  } = inputs;
+
+  const sourceTypeOverride = "GITHUB";
+  const sourceLocationOverride = `https://github.com/${owner}/${repo}.git`;
 
   const environmentVariablesOverride = Object.entries(process.env)
-    .filter(([key]) => key.startsWith("GITHUB_") || envVars.includes(key))
+    .filter(
+      ([key]) => key.startsWith("GITHUB_") || envPassthrough.includes(key)
+    )
     .map(([name, value]) => ({ name, value, type: "PLAINTEXT" }));
 
   // The idempotencyToken is intentionally not set.
