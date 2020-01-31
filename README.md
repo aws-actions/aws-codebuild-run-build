@@ -124,7 +124,8 @@ So, this action can also be installed locally
 to kick off a CodeBuild project from your git sandbox.
 You could push your changes to an open PR,
 but if you only want to test one project this may be faster.
-Running this way expects you to use git to select the
+In order to use this tool,
+you must first `git checkout` the commit that you want to test.
 commit you want to test (by checking it out).
 
 ```
