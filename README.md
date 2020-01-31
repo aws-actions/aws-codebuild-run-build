@@ -126,7 +126,6 @@ You could push your changes to an open PR,
 but if you only want to test one project this may be faster.
 In order to use this tool,
 you must first `git checkout` the commit that you want to test.
-commit you want to test (by checking it out).
 
 ```
 npx @aws-actions/codebuild-run-build -p ProjectName -r remoteName
