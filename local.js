@@ -48,7 +48,10 @@ pushBranch(remote, BRANCH_NAME);
 
 cb.build(sdk, params)
   .then(() => deleteBranch(remote, BRANCH_NAME))
-  .catch(() => deleteBranch(remote, BRANCH_NAME));
+  .catch(err => {
+    deleteBranch(remote, BRANCH_NAME);
+    throw err;
+  });
 
 function pushBranch(remote, branchName) {
   cp.execSync(`git push ${remote} HEAD:${branchName}`);
