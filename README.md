@@ -131,7 +131,7 @@ you must first `git checkout` the commit that you want to test.
 npx @aws-actions/codebuild-run-build -p ProjectName -r remoteName
 ```
 
-This will uses whatever commit you have checked out
+This will use whatever commit you have checked out
 and push to a temporary branch in the specified remote.
 Then kick off the build
 and delete the remote branch when complete.
