@@ -76,6 +76,41 @@ that are impossible, difficult, or simply expensive
 to access from GitHub's hosted job runners
 but are easy or cheap to access from CodeBuild.
 
+## Credentials and Permissions
+
+In order for the action to run your CodeBuild project,
+you need to provide AWS credentials.
+We recommend using [aws-actions/configure-aws-credentials]
+to configure your credentials for a job.
+
+The credentials that you provide need to have the following permissions:
+
+- `codebuild:StartBuild`
+- `codebuild:BatchGetBuilds`
+- `logs:GetLogEvents`
+
+For example:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["codebuild:StartBuild", "codebuild:BatchGetBuilds"],
+      "Resource": ["arn:aws:codebuild:REGION:ACCOUNT_ID:project/PROJECT_NAME"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["logs:GetLogEvents"],
+      "Resource": [
+        "arn:aws:logs:REGION:ACCOUNT_ID:log-group:/aws/codebuild/PROJECT_NAME:*"
+      ]
+    }
+  ]
+}
+```
+
 ## Examples
 
 These examples show how you can define a step in a workflow job.
@@ -86,6 +121,12 @@ If your CodeBuild project is already configured the way you want it,
 the only CodeBuild Run input you need to provide is the project name.
 
 ```yaml
+- name: Configure AWS Credentials
+  uses: aws-actions/configure-aws-credentials@v1
+  with:
+    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    aws-region: us-east-2
 - name: Run CodeBuild
   uses: aws-actions/aws-codebuild-run-project@v1
   with:
@@ -102,6 +143,12 @@ If any of these environment variables are defined in the CodeBuild project,
 this will overwrite them.
 
 ```yaml
+- name: Configure AWS Credentials
+  uses: aws-actions/configure-aws-credentials@v1
+  with:
+    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    aws-region: us-east-2
 - name: Run CodeBuild
   uses: aws-actions/aws-codebuild-run-project@v1
   with:
@@ -177,3 +224,4 @@ see LICENSE and NOTICE for more information.
 [github environment variables]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables
 [github actions job runners]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/virtual-environments-for-github-hosted-runners#supported-runners-and-hardware-resources
 [github workflow syntax]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
+[aws-actions/configure-aws-credentials]: https://github.com/aws-actions/configure-aws-credentials
