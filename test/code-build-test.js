@@ -3,6 +3,7 @@
 
 const {
   logName,
+  githubInputs,
   inputs2Parameters,
   waitForBuildEndTime
 } = require("../code-build");
@@ -34,6 +35,71 @@ describe("logName", () => {
   });
 });
 
+describe("githubInputs", () => {
+  const OLD_ENV = { ...process.env };
+  afterEach(() => {
+    process.env = { ...OLD_ENV };
+  });
+
+  const projectName = "project_name";
+  const repoInfo = "owner/repo";
+  const sha = "1234abcd-12ab-34cd-56ef-1234567890ab";
+
+  it("build basic parameters for codeBuild.startBuild", () => {
+    // This is how GITHUB injects its input values.
+    // It would be nice if there was an easy way to test this...
+    process.env[`INPUT_PROJECT-NAME`] = projectName;
+    process.env[`GITHUB_REPOSITORY`] = repoInfo;
+    process.env[`GITHUB_SHA`] = sha;
+    const test = githubInputs();
+    expect(test)
+      .to.haveOwnProperty("projectName")
+      .and.to.equal(projectName);
+    expect(test)
+      .to.haveOwnProperty("sourceVersion")
+      .and.to.equal(sha);
+    expect(test)
+      .to.haveOwnProperty("owner")
+      .and.to.equal(`owner`);
+    expect(test)
+      .to.haveOwnProperty("repo")
+      .and.to.equal(`repo`);
+    expect(test)
+      .to.haveOwnProperty("buildspecOverride")
+      .and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("envPassthrough")
+      .and.to.deep.equal([]);
+  });
+
+  it("a project name is required.", () => {
+    expect(() => githubInputs()).to.throw();
+  });
+
+  it("can process env-passthrough", () => {
+    // This is how GITHUB injects its input values.
+    // It would be nice if there was an easy way to test this...
+    process.env[`INPUT_PROJECT-NAME`] = projectName;
+    process.env[`GITHUB_REPOSITORY`] = repoInfo;
+    process.env[`GITHUB_SHA`] = sha;
+
+    process.env[`INPUT_ENV-PASSTHROUGH`] = `one, two 
+    , three,
+    four    `;
+
+    process.env.one = "_one_";
+    process.env.two = "_two_";
+    process.env.three = "_three_";
+    process.env.four = "_four_";
+
+    const test = githubInputs();
+
+    expect(test)
+      .to.haveOwnProperty("envPassthrough")
+      .and.to.deep.equal(["one", "two", "three", "four"]);
+  });
+});
+
 describe("inputs2Parameters", () => {
   const OLD_ENV = { ...process.env };
   afterEach(() => {
@@ -50,7 +116,12 @@ describe("inputs2Parameters", () => {
     process.env[`INPUT_PROJECT-NAME`] = projectName;
     process.env[`GITHUB_REPOSITORY`] = repoInfo;
     process.env[`GITHUB_SHA`] = sha;
-    const test = inputs2Parameters();
+    const test = inputs2Parameters({
+      projectName,
+      sourceVersion: sha,
+      owner: "owner",
+      repo: "repo"
+    });
     expect(test)
       .to.haveOwnProperty("projectName")
       .and.to.equal(projectName);
@@ -99,11 +170,7 @@ describe("inputs2Parameters", () => {
       .and.to.equal("PLAINTEXT");
   });
 
-  it("a project name is required.", () => {
-    expect(() => inputs2Parameters()).to.throw();
-  });
-
-  it("can send env-passthrough", () => {
+  it("can process env-passthrough", () => {
     // This is how GITHUB injects its input values.
     // It would be nice if there was an easy way to test this...
     process.env[`INPUT_PROJECT-NAME`] = projectName;
@@ -119,7 +186,13 @@ describe("inputs2Parameters", () => {
     process.env.three = "_three_";
     process.env.four = "_four_";
 
-    const test = inputs2Parameters();
+    const test = inputs2Parameters({
+      projectName,
+      sourceVersion: sha,
+      owner: "owner",
+      repo: "repo",
+      envPassthrough: ["one", "two", "three", "four"]
+    });
 
     expect(test)
       .to.haveOwnProperty("environmentVariablesOverride")
