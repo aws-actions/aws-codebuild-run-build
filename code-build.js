@@ -15,14 +15,16 @@ module.exports = {
   logName
 };
 
-function buildProject() {
+async function buildProject() {
   // get a codeBuild instance from the SDK
   const sdk = buildSdk();
 
   // Get input options for startBuild
   const params = inputs2Parameters();
 
-  return _buildProject(sdk, params);
+  console.log("*****STARTING CODEBUILD*****");
+  await _buildProject(sdk, params);
+  console.log("*****CODEBUILD COMPLETE*****");
 }
 
 async function _buildProject(sdk, params) {
