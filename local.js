@@ -37,7 +37,7 @@ const BRANCH_NAME = uuid();
 const params = cb.inputs2Parameters({
   projectName,
   ...githubInfo(remote),
-  sourceVersion: cp.execSync(`git rev-parse HEAD`).toString(),
+  sourceVersion: BRANCH_NAME,
   buildspecOverride,
   envPassthrough
 });
@@ -60,7 +60,22 @@ function deleteBranch(remote, branchName) {
 
 function githubInfo(remote) {
   const gitHubSSH = "git@github.com:";
-  const gitRemote = cp.execSync(`git remote -v | grep ${remote}`).toString();
+  /* Expecting to match something like:
+   * 'fork    git@github.com:seebees/aws-codebuild-run-build.git (push)'
+   * Which is the output of `git remote -v`
+   */
+  const remoteMatch = /^fork.*\(push\)$/;
+  /* Not doing a grep because then I have to pass user input to the shell.
+   * This way I don't have to worry about sanitizing and injection and all that jazz.
+   * Further, when I _do_ pass the remote into the shell to push to it,
+   * given that I find it in the remote list,
+   * I feel confident that there are no shinanaigans.
+   */
+  const [gitRemote] = cp
+    .execSync("git remote -v")
+    .toString()
+    .split("\n")
+    .filter(line => line.trim().match(remoteMatch));
   assert(gitRemote, `No remote found named ${remote}`);
   const [, url] = gitRemote.split(/[\t ]/);
   assert(url.startsWith(gitHubSSH), `Unsupported format: ${url}`);
