@@ -76,14 +76,14 @@ describe("githubInputs", () => {
     expect(() => githubInputs()).to.throw();
   });
 
-  it("can process env-passthrough", () => {
+  it("can process env-vars-for-codebuild", () => {
     // This is how GITHUB injects its input values.
     // It would be nice if there was an easy way to test this...
     process.env[`INPUT_PROJECT-NAME`] = projectName;
     process.env[`GITHUB_REPOSITORY`] = repoInfo;
     process.env[`GITHUB_SHA`] = sha;
 
-    process.env[`INPUT_ENV-PASSTHROUGH`] = `one, two 
+    process.env[`INPUT_ENV-VARS-FOR-CODEBUILD`] = `one, two 
     , three,
     four    `;
 
@@ -170,14 +170,14 @@ describe("inputs2Parameters", () => {
       .and.to.equal("PLAINTEXT");
   });
 
-  it("can process env-passthrough", () => {
+  it("can process env-vars-for-codebuild", () => {
     // This is how GITHUB injects its input values.
     // It would be nice if there was an easy way to test this...
     process.env[`INPUT_PROJECT-NAME`] = projectName;
     process.env[`GITHUB_REPOSITORY`] = repoInfo;
     process.env[`GITHUB_SHA`] = sha;
 
-    process.env[`INPUT_ENV-PASSTHROUGH`] = `one, two 
+    process.env[`INPUT_ENV-VARS-FOR-CODEBUILD`] = `one, two 
     , three,
     four    `;
 

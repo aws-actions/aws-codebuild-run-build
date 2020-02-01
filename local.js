@@ -20,7 +20,7 @@ const { projectName, buildspecOverride, envPassthrough, remote } = yargs
     describe: "Path to buildspec file",
     type: "string"
   })
-  .option("env-passthrough", {
+  .option("env-vars-for-codebuild", {
     alias: "e",
     describe: "List of environment variables to send to CodeBuild",
     type: "array"
