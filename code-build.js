@@ -79,7 +79,7 @@ function githubInputs() {
     core.getInput("buildspec-override", { required: false }) || undefined;
 
   const envPassthrough = core
-    .getInput("env-passthrough", { required: false })
+    .getInput("env-vars-for-codebuild", { required: false })
     .split(",")
     .map(i => i.trim())
     .filter(i => i !== "");

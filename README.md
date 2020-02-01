@@ -20,7 +20,7 @@ The only required input is `project-name`.
    that CodeBuild requires.
    By default, the action uses the buildspec file location
    that you configured in the CodeBuild project.
-1. **env-passthrough** (optional) :
+1. **env-vars-for-codebuild** (optional) :
    A comma-separated list of the names of environment variables
    that the action passes from GitHub Actions to CodeBuild.
 
@@ -154,7 +154,7 @@ this will overwrite them.
   with:
     project-name: CodeBuildProjectName
     buildspec-override: path/to/buildspec.yaml
-    env-passthrough: |
+    env-vars-for-codebuild: |
       custom,
       requester,
       event-name
