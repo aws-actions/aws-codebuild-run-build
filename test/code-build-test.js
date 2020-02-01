@@ -83,7 +83,7 @@ describe("githubInputs", () => {
     process.env[`GITHUB_REPOSITORY`] = repoInfo;
     process.env[`GITHUB_SHA`] = sha;
 
-    process.env[`INPUT_ENV-PASSTHROUGH`] = `one, two 
+    process.env[`INPUT_ENV-VARS-FOR-CODEBUILD`] = `one, two 
     , three,
     four    `;
 
@@ -177,7 +177,7 @@ describe("inputs2Parameters", () => {
     process.env[`GITHUB_REPOSITORY`] = repoInfo;
     process.env[`GITHUB_SHA`] = sha;
 
-    process.env[`INPUT_ENV-PASSTHROUGH`] = `one, two 
+    process.env[`INPUT_ENV-VARS-FOR-CODEBUILD`] = `one, two 
     , three,
     four    `;
 
