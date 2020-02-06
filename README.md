@@ -83,6 +83,12 @@ you need to provide AWS credentials.
 We recommend using [aws-actions/configure-aws-credentials]
 to configure your credentials for a job.
 
+**NOTE:
+GitHub Secrets are not passed to the runner when a workflow is triggered from a forked repository.
+This means that you cannot use this action directly in a workflow
+that is triggered by pull requests from a fork.
+See the [GitHub Secrets docs][github secrets access] for more information.**
+
 The credentials that you provide need to have the following permissions:
 
 - `codebuild:StartBuild`
@@ -246,4 +252,5 @@ see LICENSE and NOTICE for more information.
 [github environment variables]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables
 [github actions job runners]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/virtual-environments-for-github-hosted-runners#supported-runners-and-hardware-resources
 [github workflow syntax]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
+[github secrets access]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets#using-encrypted-secrets-in-a-workflow
 [aws-actions/configure-aws-credentials]: https://github.com/aws-actions/configure-aws-credentials
