@@ -1,6 +1,6 @@
 {
   "name": "@aws-actions/codebuild-run-build",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Execute CodeBuild::startBuild for the current repo.",
   "main": "index.js",
   "scripts": {
