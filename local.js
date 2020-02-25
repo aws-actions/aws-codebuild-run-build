@@ -63,11 +63,12 @@ function deleteBranch(remote, branchName) {
 
 function githubInfo(remote) {
   const gitHubSSH = "git@github.com:";
+  const gitHubHTTPS = "https://github.com/";
   /* Expecting to match something like:
    * 'fork    git@github.com:seebees/aws-codebuild-run-build.git (push)'
    * Which is the output of `git remote -v`
    */
-  const remoteMatch = /^fork.*\(push\)$/;
+  const remoteMatch = new RegExp(`^${remote}.*\\(push\\)$`);
   /* Not doing a grep because then I have to pass user input to the shell.
    * This way I don't have to worry about sanitizing and injection and all that jazz.
    * Further, when I _do_ pass the remote into the shell to push to it,
@@ -81,7 +82,13 @@ function githubInfo(remote) {
     .filter(line => line.trim().match(remoteMatch));
   assert(gitRemote, `No remote found named ${remote}`);
   const [, url] = gitRemote.split(/[\t ]/);
-  assert(url.startsWith(gitHubSSH), `Unsupported format: ${url}`);
-  const [owner, repo] = url.slice(gitHubSSH.length, -4).split("/");
-  return { owner, repo };
+  if (url.startsWith(gitHubHTTPS)) {
+    const [owner, repo] = url.slice(gitHubHTTPS.length, -4).split("/");
+    return { owner, repo };
+  } else if (url.startsWith(gitHubSSH)) {
+    const [owner, repo] = url.slice(gitHubSSH.length, -4).split("/");
+    return { owner, repo };
+  } else {
+    throw new Error(`Unsupported format: ${url}`);
+  }
 }
