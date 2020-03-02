@@ -42,6 +42,9 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
   const { cloudWatchLogsArn } = logs;
   const { logGroupName, logStreamName } = logName(cloudWatchLogsArn);
 
+  let errorDetected = false;
+  let errMessage = '';
+
   // Check the state
   const [batch, cloudWatch = {}] = await Promise.all([
     codeBuild.batchGetBuilds({ ids: [id] }).promise(),
@@ -50,25 +53,47 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
       cloudWatchLogs
         .getLogEvents({ logGroupName, logStreamName, startFromHead, nextToken })
         .promise()
-  ]);
-  // Pluck off the relevant state
-  const [current] = batch.builds;
-  const { nextForwardToken, events = [] } = cloudWatch;
+  ]).catch((err) => {
+    errorDetected = true;
+    errMessage = err.message;
+  });
 
-  // stdout the CloudWatchLog (everyone likes progress...)
-  // CloudWatchLogs have line endings.
-  // I trim and then log each line
-  // to ensure that the line ending is OS specific.
-  events.forEach(({ message }) => console.log(message.trimEnd()));
+  if(errorDetected) {
+    //We caught an error in trying to make the AWS api call, and are now checking to see if it was just a rate limiting error
+    if(errMessage.search('Rate exceeded') !== -1) {
 
-  // We did it! We can stop looking!
-  if (current.endTime && !events.length) return current;
+      //We were rate-limited, so add 15 seconds to the wait time
+      let newWait = wait + 15000;
 
-  // More to do: Sleep for 30 seconds :)
-  await new Promise(resolve => setTimeout(resolve, wait));
+      //Sleep before trying again
+      await new Promise(resolve => setTimeout(resolve, newWait));
 
-  // Try again
-  return waitForBuildEndTime(sdk, current, nextForwardToken);
+      // Try again from the same token position
+      return waitForBuildEndTime({ ...sdk, wait: newWait }, { id, logs }, nextToken);
+    } else {
+      //The error returned from the API wasn't about rate limiting, so throw it as an actual error and fail the job
+      throw errMessage;
+    }
+  } else {
+    // Pluck off the relevant state
+    const [current] = batch.builds;
+    const { nextForwardToken, events = [] } = cloudWatch;
+
+    // stdout the CloudWatchLog (everyone likes progress...)
+    // CloudWatchLogs have line endings.
+    // I trim and then log each line
+    // to ensure that the line ending is OS specific.
+    events.forEach(({ message }) => console.log(message.trimEnd()));
+
+    // We did it! We can stop looking!
+    if (current.endTime && !events.length) return current;
+
+    // More to do: Sleep for a few seconds to avoid rate limiting
+    await new Promise(resolve => setTimeout(resolve, wait));
+
+    // Try again
+    return waitForBuildEndTime(sdk, current, nextForwardToken);
+  }
 }
 
 function githubInputs() {
