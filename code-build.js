@@ -64,7 +64,7 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
   // We did it! We can stop looking!
   if (current.endTime && !events.length) return current;
 
-  // More to do: Sleep for 5 seconds :)
+  // More to do: Sleep for 30 seconds :)
   await new Promise(resolve => setTimeout(resolve, wait));
 
   // Try again
