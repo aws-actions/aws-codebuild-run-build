@@ -35,7 +35,7 @@ async function build(sdk, params) {
 }
 
 async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
-  const { codeBuild, cloudWatchLogs, wait = 1000 * 5 } = sdk;
+  const { codeBuild, cloudWatchLogs, wait = 1000 * 30 } = sdk;
 
   // Get the CloudWatchLog info
   const startFromHead = true;
