@@ -55,12 +55,12 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
         .promise()
   ]).catch((err) => {
     errorDetected = true;
-    errMessage = err.message;
+    errMessage = err;
   });
 
   if(errorDetected) {
     //We caught an error in trying to make the AWS api call, and are now checking to see if it was just a rate limiting error
-    if(errMessage.search('Rate exceeded') !== -1) {
+    if(errMessage.message && errMessage.message.search('Rate exceeded') !== -1) {
 
       //We were rate-limited, so add 15 seconds to the wait time
       let newWait = wait + 15000;
