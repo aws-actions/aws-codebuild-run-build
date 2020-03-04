@@ -320,7 +320,7 @@ describe("waitForBuildEndTime", () => {
   });
 
   it("waits after being rate limited and tries again", async function() {
-    this.timeout(45000);
+    //this.timeout(45000);
     const buildID = "buildID";
     const nullArn =
       "arn:aws:logs:us-west-2:111122223333:log-group:null:log-stream:null";
@@ -356,16 +356,19 @@ describe("waitForBuildEndTime", () => {
       }
     );
 
-    const test = await waitForBuildEndTime(sdk, {
-      id: buildID,
-      logs: { cloudWatchLogsArn: nullArn }
-    });
+    const test = await waitForBuildEndTime(
+      { ...sdk, wait: 1, backOff: 1 },
+      {
+        id: buildID,
+        logs: { cloudWatchLogsArn: nullArn }
+      }
+    );
 
     expect(test.id).to.equal(buildID);
   });
 
   it("dies after getting an error from the aws sdk that isn't rate limiting", async function() {
-    this.timeout(45000);
+    //this.timeout(45000);
     const buildID = "buildID";
     const nullArn =
       "arn:aws:logs:us-west-2:111122223333:log-group:null:log-stream:null";
@@ -386,7 +389,8 @@ describe("waitForBuildEndTime", () => {
 
     const sdk = help(
       () => {
-        //similar to the ret function in the helper, allows me to throw an error in a function or return a more standard reply
+        //similar to the ret function in the helper
+        //allows me to throw an error in a function or return a more standard reply
         let reply = buildReplies.shift();
 
         if (typeof reply === "function") return reply();
@@ -405,10 +409,13 @@ describe("waitForBuildEndTime", () => {
     let didFail = false;
 
     try {
-      await waitForBuildEndTime(sdk, {
-        id: buildID,
-        logs: { cloudWatchLogsArn: nullArn }
-      });
+      await waitForBuildEndTime(
+        { ...sdk, wait: 1, backOff: 1 },
+        {
+          id: buildID,
+          logs: { cloudWatchLogsArn: nullArn }
+        }
+      );
     } catch (err) {
       didFail = true;
       expect(err.message).to.equal("Some AWS error");

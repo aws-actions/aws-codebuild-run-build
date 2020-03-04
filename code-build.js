@@ -35,7 +35,12 @@ async function build(sdk, params) {
 }
 
 async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
-  const { codeBuild, cloudWatchLogs, wait = 1000 * 30 } = sdk;
+  const {
+    codeBuild,
+    cloudWatchLogs,
+    wait = 1000 * 30,
+    backOff = 1000 * 15
+  } = sdk;
 
   // Get the CloudWatchLog info
   const startFromHead = true;
@@ -67,7 +72,7 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
       errMessage.message.search("Rate exceeded") !== -1
     ) {
       //We were rate-limited, so add 15 seconds to the wait time
-      let newWait = wait + 15000;
+      let newWait = wait + backOff;
 
       //Sleep before trying again
       await new Promise(resolve => setTimeout(resolve, newWait));
