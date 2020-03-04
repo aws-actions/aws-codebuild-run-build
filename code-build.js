@@ -71,7 +71,7 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
       errMessage.message &&
       errMessage.message.search("Rate exceeded") !== -1
     ) {
-      //We were rate-limited, so add 15 seconds to the wait time
+      //We were rate-limited, so add `backUp` seconds to the wait time
       let newWait = wait + backOff;
 
       //Sleep before trying again
