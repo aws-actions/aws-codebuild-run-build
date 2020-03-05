@@ -59,7 +59,11 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
         .promise()
   ]).catch(err => {
     errObject = err;
-
+/* Returning [] here so that the assignment above
+ * does not throw `TypeError: undefined is not iterable`.
+ * The error is handled below,
+ * since it might be a rate limit.
+ */
     return [];
   });
 
