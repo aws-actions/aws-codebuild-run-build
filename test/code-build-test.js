@@ -318,6 +318,109 @@ describe("waitForBuildEndTime", () => {
     });
     expect(test).to.equal(buildReplies.pop().builds[0]);
   });
+
+  it("waits after being rate limited and tries again", async function() {
+    const buildID = "buildID";
+    const nullArn =
+      "arn:aws:logs:us-west-2:111122223333:log-group:null:log-stream:null";
+    const cloudWatchLogsArn =
+      "arn:aws:logs:us-west-2:111122223333:log-group:/aws/codebuild/CloudWatchLogGroup:log-stream:1234abcd-12ab-34cd-56ef-1234567890ab";
+
+    const buildReplies = [
+      () => {
+        throw { message: "Rate exceeded" };
+      },
+      { builds: [{ id: buildID, logs: { cloudWatchLogsArn } }] },
+      {
+        builds: [
+          { id: buildID, logs: { cloudWatchLogsArn }, endTime: "endTime" }
+        ]
+      }
+    ];
+
+    const sdk = help(
+      () => {
+        //similar to the ret function in the helper, allows me to throw an error in a function or return a more standard reply
+        let reply = buildReplies.shift();
+
+        if (typeof reply === "function") return reply();
+        return reply;
+      },
+      () => {
+        if (!buildReplies.length) {
+          return { events: [] };
+        }
+
+        return { events: [{ message: "got one" }] };
+      }
+    );
+
+    const test = await waitForBuildEndTime(
+      { ...sdk, wait: 1, backOff: 1 },
+      {
+        id: buildID,
+        logs: { cloudWatchLogsArn: nullArn }
+      }
+    );
+
+    expect(test.id).to.equal(buildID);
+  });
+
+  it("dies after getting an error from the aws sdk that isn't rate limiting", async function() {
+    const buildID = "buildID";
+    const nullArn =
+      "arn:aws:logs:us-west-2:111122223333:log-group:null:log-stream:null";
+    const cloudWatchLogsArn =
+      "arn:aws:logs:us-west-2:111122223333:log-group:/aws/codebuild/CloudWatchLogGroup:log-stream:1234abcd-12ab-34cd-56ef-1234567890ab";
+
+    const buildReplies = [
+      () => {
+        throw { message: "Some AWS error" };
+      },
+      { builds: [{ id: buildID, logs: { cloudWatchLogsArn } }] },
+      {
+        builds: [
+          { id: buildID, logs: { cloudWatchLogsArn }, endTime: "endTime" }
+        ]
+      }
+    ];
+
+    const sdk = help(
+      () => {
+        //similar to the ret function in the helper
+        //allows me to throw an error in a function or return a more standard reply
+        let reply = buildReplies.shift();
+
+        if (typeof reply === "function") return reply();
+        return reply;
+      },
+      () => {
+        if (!buildReplies.length) {
+          return { events: [] };
+        }
+
+        return { events: [{ message: "got one" }] };
+      }
+    );
+
+    //run the thing and it should fail
+    let didFail = false;
+
+    try {
+      await waitForBuildEndTime(
+        { ...sdk, wait: 1, backOff: 1 },
+        {
+          id: buildID,
+          logs: { cloudWatchLogsArn: nullArn }
+        }
+      );
+    } catch (err) {
+      didFail = true;
+      expect(err.message).to.equal("Some AWS error");
+    }
+
+    expect(didFail).to.equal(true);
+  });
 });
 
 function help(builds, logs) {

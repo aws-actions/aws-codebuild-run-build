@@ -35,12 +35,19 @@ async function build(sdk, params) {
 }
 
 async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
-  const { codeBuild, cloudWatchLogs, wait = 1000 * 5 } = sdk;
+  const {
+    codeBuild,
+    cloudWatchLogs,
+    wait = 1000 * 30,
+    backOff = 1000 * 15
+  } = sdk;
 
   // Get the CloudWatchLog info
   const startFromHead = true;
   const { cloudWatchLogsArn } = logs;
   const { logGroupName, logStreamName } = logName(cloudWatchLogsArn);
+
+  let errObject = false;
 
   // Check the state
   const [batch, cloudWatch = {}] = await Promise.all([
@@ -50,7 +57,37 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
       cloudWatchLogs
         .getLogEvents({ logGroupName, logStreamName, startFromHead, nextToken })
         .promise()
-  ]);
+  ]).catch(err => {
+    errObject = err;
+/* Returning [] here so that the assignment above
+ * does not throw `TypeError: undefined is not iterable`.
+ * The error is handled below,
+ * since it might be a rate limit.
+ */
+    return [];
+  });
+
+  if (errObject) {
+    //We caught an error in trying to make the AWS api call, and are now checking to see if it was just a rate limiting error
+    if (errObject.message && errObject.message.search("Rate exceeded") !== -1) {
+      //We were rate-limited, so add `backOff` seconds to the wait time
+      let newWait = wait + backOff;
+
+      //Sleep before trying again
+      await new Promise(resolve => setTimeout(resolve, newWait));
+
+      // Try again from the same token position
+      return waitForBuildEndTime(
+        { ...sdk, wait: newWait },
+        { id, logs },
+        nextToken
+      );
+    } else {
+      //The error returned from the API wasn't about rate limiting, so throw it as an actual error and fail the job
+      throw errObject;
+    }
+  }
+
   // Pluck off the relevant state
   const [current] = batch.builds;
   const { nextForwardToken, events = [] } = cloudWatch;
@@ -64,7 +101,7 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
   // We did it! We can stop looking!
   if (current.endTime && !events.length) return current;
 
-  // More to do: Sleep for 5 seconds :)
+  // More to do: Sleep for a few seconds to avoid rate limiting
   await new Promise(resolve => setTimeout(resolve, wait));
 
   // Try again
