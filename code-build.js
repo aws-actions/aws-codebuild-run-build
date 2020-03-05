@@ -47,8 +47,7 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
   const { cloudWatchLogsArn } = logs;
   const { logGroupName, logStreamName } = logName(cloudWatchLogsArn);
 
-  let errorDetected = false;
-  let errObject = {};
+  let errObject = false;
 
   // Check the state
   const [batch, cloudWatch = {}] = await Promise.all([
@@ -59,13 +58,12 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
         .getLogEvents({ logGroupName, logStreamName, startFromHead, nextToken })
         .promise()
   ]).catch(err => {
-    errorDetected = true;
     errObject = err;
 
     return [];
   });
 
-  if (errorDetected) {
+  if (errObject) {
     //We caught an error in trying to make the AWS api call, and are now checking to see if it was just a rate limiting error
     if (errObject.message && errObject.message.search("Rate exceeded") !== -1) {
       //We were rate-limited, so add `backOff` seconds to the wait time
