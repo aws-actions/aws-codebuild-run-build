@@ -320,7 +320,6 @@ describe("waitForBuildEndTime", () => {
   });
 
   it("waits after being rate limited and tries again", async function() {
-    //this.timeout(45000);
     const buildID = "buildID";
     const nullArn =
       "arn:aws:logs:us-west-2:111122223333:log-group:null:log-stream:null";
@@ -368,7 +367,6 @@ describe("waitForBuildEndTime", () => {
   });
 
   it("dies after getting an error from the aws sdk that isn't rate limiting", async function() {
-    //this.timeout(45000);
     const buildID = "buildID";
     const nullArn =
       "arn:aws:logs:us-west-2:111122223333:log-group:null:log-stream:null";
