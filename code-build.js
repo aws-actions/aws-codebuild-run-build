@@ -59,11 +59,11 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
         .promise()
   ]).catch(err => {
     errObject = err;
-/* Returning [] here so that the assignment above
- * does not throw `TypeError: undefined is not iterable`.
- * The error is handled below,
- * since it might be a rate limit.
- */
+    /* Returning [] here so that the assignment above
+     * does not throw `TypeError: undefined is not iterable`.
+     * The error is handled below,
+     * since it might be a rate limit.
+     */
     return [];
   });
 
@@ -167,11 +167,11 @@ function inputs2Parameters(inputs) {
 
 function buildSdk() {
   const codeBuild = new aws.CodeBuild({
-    customUserAgent: "aws-codbuild-run-project"
+    customUserAgent: "aws-actions/aws-codebuild-run-build"
   });
 
   const cloudWatchLogs = new aws.CloudWatchLogs({
-    customUserAgent: "aws-codbuild-run-project"
+    customUserAgent: "aws-actions/aws-codebuild-run-build"
   });
 
   assert(
