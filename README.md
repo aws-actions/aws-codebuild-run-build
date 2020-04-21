@@ -15,6 +15,9 @@ This action offers three inputs that you can use to configure its behavior.
 The only required input is `project-name`.
 
 1. **project-name** (required) : The name of CodeBuild project you want to run.
+1. **source-version-override** (optional) :
+   The source version you would like to show up in CodeBuild.
+   By default, the action uses the `GITHUB_SHA` from the GitHub Action run.
 1. **buildspec-override** (optional) :
    The location (in this repository) of the [buildspec file][codebuild buildspec]
    that CodeBuild requires.
@@ -159,6 +162,7 @@ this will overwrite them.
   uses: aws-actions/aws-codebuild-run-project@v1.0.0
   with:
     project-name: CodeBuildProjectName
+    source-version-override: abcdef12345
     buildspec-override: path/to/buildspec.yaml
     env-vars-for-codebuild: |
       custom,
@@ -213,7 +217,7 @@ we always pass the following parameters and values to CodeBuild in the StartBuil
 
 | CodeBuild value          | GitHub value                           |
 | ------------------------ | -------------------------------------- |
-| `sourceVersion`          | The commit that triggered the workflow |
+| `sourceVersion`          | The commit that triggered the workflow or the source-version-override |
 | `sourceTypeOverride`     | The string `'GITHUB'`                  |
 | `sourceLocationOverride` | The `HTTPS` git url for `context.repo` |
 

@@ -7,6 +7,9 @@ inputs:
   project-name:
     description: 'AWS CodeBuild Project Name'
     required: true
+  source-version-override:
+    description: 'Source Version Override'
+    required: false
   buildspec-override:
     description: 'Buildspec Override'
     required: false

@@ -114,7 +114,8 @@ function githubInputs() {
   // The github.context.sha is evaluated on import.
   // This makes it hard to test.
   // So I use the raw ENV
-  const sourceVersion = process.env[`GITHUB_SHA`];
+  const sourceVersion =
+    core.getInput("source-version-override", { required: false }) || process.env[`GITHUB_SHA`];
   const buildspecOverride =
     core.getInput("buildspec-override", { required: false }) || undefined;
 

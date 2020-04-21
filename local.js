@@ -8,11 +8,16 @@ const cb = require("./code-build");
 const assert = require("assert");
 const yargs = require("yargs");
 
-const { projectName, buildspecOverride, envPassthrough, remote } = yargs
+const { projectName, sourceVersionOverride, buildspecOverride, envPassthrough, remote } = yargs
   .option("project-name", {
     alias: "p",
     describe: "AWS CodeBuild Project Name",
     demandOption: true,
+    type: "string"
+  })
+  .option("source-version-override", {
+    alias: "s",
+    describe: "Source Version override",
     type: "string"
   })
   .option("buildspec-override", {
