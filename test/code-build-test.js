@@ -42,7 +42,8 @@ describe("githubInputs", () => {
 
   const projectName = "project_name";
   const repoInfo = "owner/repo";
-  const sha = "1234abcd-12ab-34cd-56ef-1234567890ab";
+  const sha =
+    process.env[`GITHUB_SHA`] || "1234abcd-12ab-34cd-56ef-1234567890ab";
   const pullRequestSha = "181600acb3cfb803f4570d0018928be5d730c00d";
 
   it("build basic parameters for codeBuild.startBuild", () => {
