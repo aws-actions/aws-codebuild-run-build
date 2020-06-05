@@ -7,6 +7,8 @@ The action builds the CodeBuild project, collects the build logs, and prints the
 The user experience is the same as it would be if the logic were executed
 in the GitHub Actions job runner.
 
+[Security issue notifications](./CONTRIBUTING.md#security-issue-notifications)
+
 ## Usage
 
 ### Inputs
