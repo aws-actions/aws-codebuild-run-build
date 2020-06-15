@@ -13,23 +13,23 @@ const { projectName, buildspecOverride, envPassthrough, remote } = yargs
     alias: "p",
     describe: "AWS CodeBuild Project Name",
     demandOption: true,
-    type: "string"
+    type: "string",
   })
   .option("buildspec-override", {
     alias: "b",
     describe: "Path to buildspec file",
-    type: "string"
+    type: "string",
   })
   .option("env-vars-for-codebuild", {
     alias: "e",
     describe: "List of environment variables to send to CodeBuild",
-    type: "array"
+    type: "array",
   })
   .option("remote", {
     alias: "r",
     describe: "remote name to publish to",
     default: "origin",
-    type: "string"
+    type: "string",
   }).argv;
 
 const BRANCH_NAME = uuid();
@@ -39,7 +39,7 @@ const params = cb.inputs2Parameters({
   ...githubInfo(remote),
   sourceVersion: BRANCH_NAME,
   buildspecOverride,
-  envPassthrough
+  envPassthrough,
 });
 
 const sdk = cb.buildSdk();
@@ -48,7 +48,7 @@ pushBranch(remote, BRANCH_NAME);
 
 cb.build(sdk, params)
   .then(() => deleteBranch(remote, BRANCH_NAME))
-  .catch(err => {
+  .catch((err) => {
     deleteBranch(remote, BRANCH_NAME);
     throw err;
   });
@@ -79,7 +79,7 @@ function githubInfo(remote) {
     .execSync("git remote -v")
     .toString()
     .split("\n")
-    .filter(line => line.trim().match(remoteMatch));
+    .filter((line) => line.trim().match(remoteMatch));
   assert(gitRemote, `No remote found named ${remote}`);
   const [, url] = gitRemote.split(/[\t ]/);
   if (url.startsWith(gitHubHTTPS)) {
