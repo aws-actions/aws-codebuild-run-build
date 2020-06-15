@@ -13,7 +13,7 @@ module.exports = {
   inputs2Parameters,
   githubInputs,
   buildSdk,
-  logName
+  logName,
 };
 
 function runBuild() {
@@ -39,7 +39,7 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
     codeBuild,
     cloudWatchLogs,
     wait = 1000 * 30,
-    backOff = 1000 * 15
+    backOff = 1000 * 15,
   } = sdk;
 
   // Get the CloudWatchLog info
@@ -56,8 +56,8 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
     logGroupName &&
       cloudWatchLogs
         .getLogEvents({ logGroupName, logStreamName, startFromHead, nextToken })
-        .promise()
-  ]).catch(err => {
+        .promise(),
+  ]).catch((err) => {
     errObject = err;
     /* Returning [] here so that the assignment above
      * does not throw `TypeError: undefined is not iterable`.
@@ -74,7 +74,7 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
       let newWait = wait + backOff;
 
       //Sleep before trying again
-      await new Promise(resolve => setTimeout(resolve, newWait));
+      await new Promise((resolve) => setTimeout(resolve, newWait));
 
       // Try again from the same token position
       return waitForBuildEndTime(
@@ -102,7 +102,7 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
   if (current.endTime && !events.length) return current;
 
   // More to do: Sleep for a few seconds to avoid rate limiting
-  await new Promise(resolve => setTimeout(resolve, wait));
+  await new Promise((resolve) => setTimeout(resolve, wait));
 
   // Try again
   return waitForBuildEndTime(sdk, current, nextForwardToken);
@@ -121,8 +121,8 @@ function githubInputs() {
   const envPassthrough = core
     .getInput("env-vars-for-codebuild", { required: false })
     .split(",")
-    .map(i => i.trim())
-    .filter(i => i !== "");
+    .map((i) => i.trim())
+    .filter((i) => i !== "");
 
   return {
     projectName,
@@ -130,7 +130,7 @@ function githubInputs() {
     repo,
     sourceVersion,
     buildspecOverride,
-    envPassthrough
+    envPassthrough,
   };
 }
 
@@ -141,7 +141,7 @@ function inputs2Parameters(inputs) {
     repo,
     sourceVersion,
     buildspecOverride,
-    envPassthrough = []
+    envPassthrough = [],
   } = inputs;
 
   const sourceTypeOverride = "GITHUB";
@@ -161,17 +161,17 @@ function inputs2Parameters(inputs) {
     sourceTypeOverride,
     sourceLocationOverride,
     buildspecOverride,
-    environmentVariablesOverride
+    environmentVariablesOverride,
   };
 }
 
 function buildSdk() {
   const codeBuild = new aws.CodeBuild({
-    customUserAgent: "aws-actions/aws-codebuild-run-build"
+    customUserAgent: "aws-actions/aws-codebuild-run-build",
   });
 
   const cloudWatchLogs = new aws.CloudWatchLogs({
-    customUserAgent: "aws-actions/aws-codebuild-run-build"
+    customUserAgent: "aws-actions/aws-codebuild-run-build",
   });
 
   assert(
@@ -189,7 +189,7 @@ function logName(Arn) {
   if (logGroupName === "null" || logStreamName === "null")
     return {
       logGroupName: undefined,
-      logStreamName: undefined
+      logStreamName: undefined,
     };
   return { logGroupName, logStreamName };
 }
