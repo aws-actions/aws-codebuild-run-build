@@ -33,13 +33,19 @@ describe("logName", () => {
 
 describe("githubInputs", () => {
   const OLD_ENV = { ...process.env };
+  const { context: OLD_CONTEXT } = require("@actions/github");
+  const { payload: OLD_PAYLOAD, eventName: OLD_EVENT_NAME } = OLD_CONTEXT;
   afterEach(() => {
     process.env = { ...OLD_ENV };
+    const { context } = require("@actions/github");
+    context.eventName = OLD_EVENT_NAME;
+    context.payload = OLD_PAYLOAD;
   });
 
   const projectName = "project_name";
   const repoInfo = "owner/repo";
   const sha = "1234abcd-12ab-34cd-56ef-1234567890ab";
+  const pullRequestSha = "181600acb3cfb803f4570d0018928be5d730c00d";
 
   it("build basic parameters for codeBuild.startBuild", () => {
     // This is how GITHUB injects its input values.
@@ -47,6 +53,9 @@ describe("githubInputs", () => {
     process.env[`INPUT_PROJECT-NAME`] = projectName;
     process.env[`GITHUB_REPOSITORY`] = repoInfo;
     process.env[`GITHUB_SHA`] = sha;
+    // These tests run in pull requests
+    // so to tests things that are NOT pull request...
+    process.env[`GITHUB_EVENT_NAME`] = "not_pull_request";
     const test = githubInputs();
     expect(test).to.haveOwnProperty("projectName").and.to.equal(projectName);
     expect(test).to.haveOwnProperty("sourceVersion").and.to.equal(sha);
@@ -83,6 +92,44 @@ describe("githubInputs", () => {
     expect(test)
       .to.haveOwnProperty("envPassthrough")
       .and.to.deep.equal(["one", "two", "three", "four"]);
+  });
+
+  it("can handle pull requests", () => {
+    // This is how GITHUB injects its input values.
+    // It would be nice if there was an easy way to test this...
+    process.env[`INPUT_PROJECT-NAME`] = projectName;
+    process.env[`GITHUB_REPOSITORY`] = repoInfo;
+    process.env[`GITHUB_SHA`] = sha;
+    process.env[`GITHUB_EVENT_NAME`] = "pull_request";
+    const { context } = require("@actions/github");
+    context.payload = { pull_request: { head: { sha: pullRequestSha } } };
+    const test = githubInputs();
+    expect(test).to.haveOwnProperty("projectName").and.to.equal(projectName);
+    expect(test)
+      .to.haveOwnProperty("sourceVersion")
+      .and.to.equal(pullRequestSha);
+    expect(test).to.haveOwnProperty("owner").and.to.equal(`owner`);
+    expect(test).to.haveOwnProperty("repo").and.to.equal(`repo`);
+    expect(test)
+      .to.haveOwnProperty("buildspecOverride")
+      .and.to.equal(undefined);
+    expect(test).to.haveOwnProperty("envPassthrough").and.to.deep.equal([]);
+  });
+
+  it("will not continue if there is no payload", () => {
+    // This is how GITHUB injects its input values.
+    // It would be nice if there was an easy way to test this...
+    process.env[`INPUT_PROJECT-NAME`] = projectName;
+    process.env[`GITHUB_REPOSITORY`] = repoInfo;
+    process.env[`GITHUB_SHA`] = sha;
+    process.env[`GITHUB_EVENT_NAME`] = "pull_request";
+    // These tests run in pull requests
+    // so to tests things that are NOT pull request...
+    require("@actions/github").context.payload = {};
+
+    expect(() => githubInputs()).to.throw(
+      "No source version could be evaluated."
+    );
   });
 });
 
