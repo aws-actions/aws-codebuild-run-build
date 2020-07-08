@@ -202,3 +202,7 @@ function logName(Arn) {
     };
   return { logGroupName, logStreamName };
 }
+
+- name: "AWS CodeBuild run build" Action For GitHub Actions
+  uses: aws-actions/aws-codebuild-run-build@v1.0.3
+
