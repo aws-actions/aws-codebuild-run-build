@@ -1,15 +1,6 @@
-name: '"AWS CodeBuild run build" Action For GitHub Actions'
-description: 'Execute CodeBuild::startBuild for the current repo.'
-branding:
-  icon: 'cloud'
-  color: 'orange'
+name: 'Easy generalized deployments'
+description: 'Kick off an easy generalized deployment'
 inputs:
-  project-name:
-    description: 'AWS CodeBuild Project Name'
-    required: true
-  buildspec-override:
-    description: 'Buildspec Override'
-    required: false
   env-vars-for-codebuild:
     description: 'Comma separated list of environment variables to send to CodeBuild'
     required: false
