@@ -117,7 +117,7 @@ function githubInputs() {
   // So I use the raw ENV.
   // There is a complexity here because for pull request
   // the GITHUB_SHA value is NOT the correct value.
-  // See: https://github.com/aws-actions/aws-codebuild-run-build/issues/36
+  // See: https://github.com/sailthru/aws-codebuild-run-build/issues/36
   const sourceVersion =
     process.env[`GITHUB_EVENT_NAME`] === "pull_request"
       ? (((payload || {}).pull_request || {}).head || {}).sha
@@ -178,7 +178,7 @@ function buildSdk() {
 
   assert(
     codeBuild.config.credentials && cloudWatchLogs.config.credentials,
-    "No credentials. Try adding @aws-actions/configure-aws-credentials earlier in your job to set up AWS credentials."
+    "No credentials. Try adding @sailthru/configure-aws-credentials earlier in your job to set up AWS credentials."
   );
 
   return { codeBuild, cloudWatchLogs };
