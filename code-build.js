@@ -152,10 +152,6 @@ function inputs2Parameters(inputs) {
     buildspecOverride,
     envPassthrough = [],
   } = inputs;
-
-  const sourceTypeOverride = "NO_SOURCE";
-  const sourceLocationOverride = `https://github.com/${owner}/${repo}.git`;
-
   const environmentVariablesOverride = Object.entries(process.env)
     .filter(
       ([key]) => key.startsWith("GITHUB_") || envPassthrough.includes(key)
@@ -166,9 +162,6 @@ function inputs2Parameters(inputs) {
   // This way the GitHub events can manage the builds.
   return {
     projectName,
-    sourceVersion,
-    sourceTypeOverride,
-    sourceLocationOverride,
     buildspecOverride,
     environmentVariablesOverride,
   };
@@ -176,11 +169,11 @@ function inputs2Parameters(inputs) {
 
 function buildSdk() {
   const codeBuild = new aws.CodeBuild({
-    customUserAgent: "aws-actions/aws-codebuild-run-build",
+    customUserAgent: "sailthru/aws-codebuild-run-build",
   });
 
   const cloudWatchLogs = new aws.CloudWatchLogs({
-    customUserAgent: "aws-actions/aws-codebuild-run-build",
+    customUserAgent: "sailthru/aws-codebuild-run-build",
   });
 
   assert(
