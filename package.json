@@ -1,6 +1,6 @@
 {
   "name": "@sailthru/codebuild-run-build",
-  "version": "1.0.6",
+  "version": "7",
   "description": "Execute CodeBuild::startBuild for the current repo.",
   "main": "index.js",
   "scripts": {
