@@ -13,6 +13,10 @@ inputs:
   env-vars-for-codebuild:
     description: 'Comma separated list of environment variables to send to CodeBuild'
     required: false
+  wait-to-finish:
+    description: 'Wait for codebuild to finish the job'
+    required: false
+    default: "true"
 outputs:
   aws-build-id:
     description: 'The AWS CodeBuild Build ID for this build.'

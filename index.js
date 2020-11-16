@@ -19,6 +19,7 @@ async function run() {
     core.setOutput("aws-build-id", build.id);
 
     // Signal the outcome
+    console.log(`Build status: ${build.buildStatus}`);
     assert(
       build.buildStatus === "SUCCEEDED",
       `Build status: ${build.buildStatus}`
