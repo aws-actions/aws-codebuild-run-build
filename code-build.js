@@ -38,7 +38,7 @@ async function build(sdk, params) {
     return waitForBuildEndTime(sdk, start.build);
   } else {
     console.log("****** Skipping the wait and returning *******");
-    return start;
+    return start.build;
   }
 }
 
