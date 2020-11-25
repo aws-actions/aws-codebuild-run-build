@@ -9,7 +9,9 @@ const assert = require("assert");
 module.exports = {
   runBuild,
   build,
+  buildBatch,
   waitForBuildEndTime,
+  waitForBatchBuildEndTime,
   inputs2Parameters,
   githubInputs,
   buildSdk,
@@ -22,8 +24,13 @@ function runBuild() {
 
   // Get input options for startBuild
   const params = inputs2Parameters(githubInputs());
+  const isBatch = core.getInput("batch").toUpper() === "TRUE";
 
-  return build(sdk, params);
+  if (isBatch) {
+    return buildBatch(sdk, params);
+  } else {
+    return build(sdk, params);
+  }
 }
 
 async function build(sdk, params) {
@@ -32,6 +39,108 @@ async function build(sdk, params) {
 
   // Wait for the build to "complete"
   return waitForBuildEndTime(sdk, start.build);
+}
+
+async function buildBatch(sdk, params) {
+  // Start the batch
+  const { buildBatch } = await sdk.codeBuild.startBuildBatch(params).promise();
+  const { id } = buildBatch;
+
+  // Wait for the batch to "complete"
+  return waitForBatchBuildEndTime(sdk, { id });
+}
+
+async function waitForBatchBuildEndTime(sdk, { id, observedBuilds = [] }) {
+  const { codeBuild, wait = 2000 } = sdk;
+
+  /* Batch builds take a long time,
+   * and there is a fare amount
+   * of eventual constancy involved.
+   * The first time I enter,
+   * I never expect this wait
+   * to impact performance.
+   * But for every recursive call,
+   * this wait makes a simple gate
+   * to keep from throttling myself.
+   */
+  await new Promise((resolve) => setTimeout(resolve, wait));
+
+  const { buildBatches } = await codeBuild
+    .batchGetBuildBatches({ ids: [id] })
+    .promise();
+  const [current] = buildBatches;
+  const { buildGroups } = current;
+
+  /* Immediately after the batch is started,
+   * the build group will be empty.
+   * I have to wait for the first build,
+   * that will process the list/matrix
+   * that start all the builds
+   * that do the work.
+   */
+  if (!buildGroups) return waitForBatchBuildEndTime(sdk, { id });
+
+  // The build ids I have not yet waited for.
+  const ids = buildGroups
+    .map(({ currentBuildSummary }) => currentBuildSummary.arn)
+    .filter((arn) => !observedBuilds.includes(arn));
+
+  /* Don't try and get the status of 0 builds.
+   * It would be nice to not have an if here,
+   * but it is nicer to not make the remote call.
+   */
+  if (ids.length) {
+    // Get the information for the builds to wait for
+    const { builds } = await codeBuild.batchGetBuilds({ ids }).promise();
+
+    for (const build of builds) {
+      console.log(`=========== START: ${build.id} =============`);
+      await waitForBuildEndTime(sdk, build)
+        /* Just because this build failed,
+         * I still need to stream the other results.
+         * waitForBuildEndTime is supposed to handle
+         * all retirable errors.
+         * It may be better to
+         * gather up these errors
+         * and throw when the batch has completed.
+         */
+        .catch((e) => {
+          console.log(`Error in build ${build.id}: ${e.stack} `);
+        });
+      console.log(`============================================`);
+    }
+
+    /* Update the observed builds
+     * since they have now been observed.
+     */
+    observedBuilds = observedBuilds.concat(builds.map(({ id }) => id));
+  }
+
+  /* Just because I have processed
+   * all the builds in the buildGroup
+   * this does not mean
+   * that the batch is complete.
+   * This is especially true with the first build.
+   * The first build in the batch generally
+   * is how all the needed builds are calculated.
+   * So the first time I'm here,
+   * I expect to have 1 build.
+   * After that first build,
+   * I expect to recurse
+   * and then have the complete set.
+   * But why not just recurse until
+   * the batch is no longer in progress?
+   */
+  if (current.buildBatchStatus === "IN_PROGRESS")
+    return waitForBatchBuildEndTime(sdk, {
+      id,
+      observedBuilds,
+    });
+
+  /* If the batch is not IN_PROGRESS
+   * this is as good as it gets.
+   */
+  return current;
 }
 
 async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {

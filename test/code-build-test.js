@@ -6,6 +6,7 @@ const {
   githubInputs,
   inputs2Parameters,
   waitForBuildEndTime,
+  waitForBatchBuildEndTime,
 } = require("../code-build");
 const { expect } = require("chai");
 
@@ -418,12 +419,102 @@ describe("waitForBuildEndTime", () => {
   });
 });
 
-function help(builds, logs) {
+describe("waitForBatchBuildEndTime", () => {
+  it("basic usage", async () => {
+    const buildID = "buildID";
+    const cloudWatchLogsArn =
+      "arn:aws:logs:us-west-2:111122223333:log-group:/aws/codebuild/CloudWatchLogGroup:log-stream:1234abcd-12ab-34cd-56ef-1234567890ab";
+
+    const buildReplies = [
+      {
+        builds: [
+          { id: buildID, logs: { cloudWatchLogsArn }, endTime: "endTime" },
+        ],
+      },
+      {
+        builds: [
+          { id: buildID, logs: { cloudWatchLogsArn }, endTime: "endTime" },
+        ],
+      },
+      {
+        builds: [],
+      },
+    ];
+    const logReplies = [{ events: [] }];
+    const batchReplies = [
+      {
+        buildBatches: [{}],
+      },
+      {
+        buildBatches: [
+          {
+            buildBatchStatus: "IN_PROGRESS",
+            buildGroups: [
+              {
+                currentBuildSummary: {
+                  arn: buildID,
+                },
+              },
+            ],
+          },
+        ],
+      },
+      {
+        buildBatches: [
+          {
+            buildBatchStatus: "SUCCESS",
+            buildGroups: [
+              {
+                currentBuildSummary: {
+                  arn: buildID,
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    let countBuild = 0;
+    let countLog = 0;
+    let countBatch = 0;
+    const sdk = help(
+      () => buildReplies[countBuild++],
+      () => logReplies[countLog++],
+      () => batchReplies[countBatch++]
+    );
+
+    const test = await waitForBatchBuildEndTime(sdk, {
+      id: buildID,
+      logs: { cloudWatchLogsArn },
+    });
+
+    expect(test).to.equal(batchReplies.pop().buildBatches[0]);
+
+    /* These counts extensively tests
+     * the underlying logic.
+     * Given the linearity
+     * of the function,
+     * I assert that this is adequate.
+     */
+    expect(countBuild).to.equal(2);
+    expect(countLog).to.equal(1);
+    expect(countBatch).to.equal(3);
+  });
+});
+
+function help(builds, logs, batches) {
   const codeBuild = {
     batchGetBuilds() {
       return {
         async promise() {
           return ret(builds);
+        },
+      };
+    },
+    batchGetBuildBatches() {
+      return {
+        async promise() {
+          return ret(batches);
         },
       };
     },
