@@ -428,16 +428,23 @@ describe("waitForBatchBuildEndTime", () => {
     const buildReplies = [
       {
         builds: [
-          { id: buildID, logs: { cloudWatchLogsArn }, endTime: "endTime" },
+          {
+            id: buildID,
+            logs: { cloudWatchLogsArn },
+            endTime: "endTime",
+            arn: buildID,
+          },
         ],
       },
       {
         builds: [
-          { id: buildID, logs: { cloudWatchLogsArn }, endTime: "endTime" },
+          {
+            id: buildID,
+            logs: { cloudWatchLogsArn },
+            endTime: "endTime",
+            arn: buildID,
+          },
         ],
-      },
-      {
-        builds: [],
       },
     ];
     const logReplies = [{ events: [] }];
