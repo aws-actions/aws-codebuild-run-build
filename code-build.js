@@ -112,8 +112,13 @@ async function waitForBatchBuildEndTime(sdk, { id, observedBuilds = [] }) {
 
     /* Update the observed builds
      * since they have now been observed.
+     * The `currentBuildSummary` does not have the id.
+     * It only has the arn,
+     * so while the id is nice to pass around,
+     * the arn is what I want to keep here.
+     * Otherwise each build will need to be streamed twice.
      */
-    observedBuilds = observedBuilds.concat(builds.map(({ id }) => id));
+    observedBuilds = observedBuilds.concat(builds.map(({ arn }) => arn));
   }
 
   /* Just because I have processed
