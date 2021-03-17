@@ -19,7 +19,9 @@
     "uuid": "^3.4.0",
     "yargs": "^15.3.1"
   },
-  "bin": "./local.js",
+  "bin": {
+    "codebuild-run-build": "local.js"
+  },
   "files": [
     "*.js"
   ],
@@ -46,5 +48,17 @@
     "*.{json,md}": [
       "prettier --write"
     ]
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hatch-Arcade/aws-codebuild-run-build.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/Hatch-Arcade/aws-codebuild-run-build/issues"
+  },
+  "homepage": "https://github.com/Hatch-Arcade/aws-codebuild-run-build#readme"
 }
