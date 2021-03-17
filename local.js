@@ -8,7 +8,13 @@ const cb = require("./code-build");
 const assert = require("assert");
 const yargs = require("yargs");
 
-const { projectName, sourceVersionOverride, buildspecOverride, envPassthrough, remote } = yargs
+const {
+  projectName,
+  sourceVersionOverride,
+  buildspecOverride,
+  envPassthrough,
+  remote,
+} = yargs
   .option("project-name", {
     alias: "p",
     describe: "AWS CodeBuild Project Name",
@@ -37,7 +43,7 @@ const { projectName, sourceVersionOverride, buildspecOverride, envPassthrough, r
     type: "string",
   }).argv;
 
-const BRANCH_NAME = sourceVersionOverride;
+const BRANCH_NAME = sourceVersionOverride || uuid();
 
 const params = cb.inputs2Parameters({
   projectName,
