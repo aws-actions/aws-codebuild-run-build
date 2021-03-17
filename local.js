@@ -37,7 +37,7 @@ const { projectName, sourceVersionOverride, buildspecOverride, envPassthrough, r
     type: "string",
   }).argv;
 
-const BRANCH_NAME = sourceVersionOverride || uuid();
+const BRANCH_NAME = sourceVersionOverride;
 
 const params = cb.inputs2Parameters({
   projectName,
