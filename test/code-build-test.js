@@ -104,7 +104,6 @@ describe("githubInputs", () => {
 
     const test = githubInputs();
 
-    console.log(test);
     expect(test)
       .to.haveOwnProperty("disableSourceOverride")
       .and.to.deep.equal(true);
