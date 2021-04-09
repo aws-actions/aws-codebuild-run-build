@@ -13,6 +13,9 @@ inputs:
   env-vars-for-codebuild:
     description: 'Comma separated list of environment variables to send to CodeBuild'
     required: false
+  disable-source-override:
+    description: 'Set to `true` if you want do disable source repo override'
+    required: false
 outputs:
   aws-build-id:
     description: 'The AWS CodeBuild Build ID for this build.'
