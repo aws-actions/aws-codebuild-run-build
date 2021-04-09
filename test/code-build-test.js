@@ -94,6 +94,22 @@ describe("githubInputs", () => {
       .and.to.deep.equal(["one", "two", "three", "four"]);
   });
 
+  it("skips override when parameter is set to true", () => {
+    // This is how GITHUB injects its input values.
+    // It would be nice if there was an easy way to test this...
+    process.env[`INPUT_PROJECT-NAME`] = projectName;
+    process.env[`INPUT_DISABLE-SOURCE-OVERRIDE`] = "true";
+    process.env[`GITHUB_REPOSITORY`] = repoInfo;
+    process.env[`GITHUB_SHA`] = sha;
+
+    const test = githubInputs();
+
+    console.log(test);
+    expect(test)
+      .to.haveOwnProperty("disableSourceOverride")
+      .and.to.deep.equal(true);
+  });
+
   it("can handle pull requests", () => {
     // This is how GITHUB injects its input values.
     // It would be nice if there was an easy way to test this...
@@ -244,6 +260,17 @@ describe("inputs2Parameters", () => {
     expect(fourEnv).to.haveOwnProperty("name").and.to.equal("four");
     expect(fourEnv).to.haveOwnProperty("value").and.to.equal("_four_");
     expect(fourEnv).to.haveOwnProperty("type").and.to.equal("PLAINTEXT");
+  });
+
+  it("skips source override when disableSourceOverride is set to true", () => {
+    const test = inputs2Parameters({
+      projectName,
+      sourceVersion: sha,
+      owner: "owner",
+      repo: "repo",
+      disableSourceOverride: true,
+    });
+    expect(test).to.not.haveOwnProperty("sourceTypeOverride");
   });
 });
 
