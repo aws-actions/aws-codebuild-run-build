@@ -7,7 +7,11 @@
     "lint": "prettier -c *.js *.json *.md test/*.js; eslint **.js test/**.js",
     "format": "prettier --write -c *.js *.json *.md test/*.js; eslint --fix **.js test/**.js",
     "package": "ncc build index.js -o dist",
-    "test": "mocha"
+    "test": "mocha",
+    "changelog": "standard-changelog",
+    "prep-release-commit": "npm --no-git-tag-version version $(npx conventional-recommended-bump -p angular)",
+    "preversion": "npm test",
+    "version": "npm run package && npm run changelog && git add -A"
   },
   "author": "aws-crypto-tools-team@amazon.com",
   "license": "Apache-2.0",
@@ -26,12 +30,14 @@
   "devDependencies": {
     "@zeit/ncc": "^0.21.1",
     "chai": "^4.2.0",
+    "conventional-recommended-bump": "^6.0.9",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.1",
     "husky": "^4.2.3",
     "lint-staged": "^10.1.2",
     "mocha": "^7.1.1",
-    "prettier": "^2.0.4"
+    "prettier": "^2.0.4",
+    "standard-changelog": "^2.0.24"
   },
   "husky": {
     "hooks": {
