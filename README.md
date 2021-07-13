@@ -183,7 +183,7 @@ In order to use this tool,
 you must first `git checkout` the commit that you want to test.
 
 ```
-npx @aws-actions/codebuild-run-build -p ProjectName -r remoteName
+npx https://github.com/aws-actions/aws-codebuild-run-build.git -p ProjectName -r remoteName
 ```
 
 This will use whatever commit you have checked out

@@ -8,7 +8,7 @@ const cb = require("./code-build");
 const assert = require("assert");
 const yargs = require("yargs");
 
-const { projectName, buildspecOverride, envPassthrough, remote } = yargs
+const { projectName, buildspecOverride, envPassthrough, remote, batch } = yargs
   .option("project-name", {
     alias: "p",
     describe: "AWS CodeBuild Project Name",
@@ -30,6 +30,11 @@ const { projectName, buildspecOverride, envPassthrough, remote } = yargs
     describe: "remote name to publish to",
     default: "origin",
     type: "string",
+  })
+  .option("batch", {
+    describe: "Run as AWS CodeBuild batch build",
+    type: "boolean",
+    default: false,
   }).argv;
 
 const BRANCH_NAME = uuid();
@@ -46,7 +51,8 @@ const sdk = cb.buildSdk();
 
 pushBranch(remote, BRANCH_NAME);
 
-cb.build(sdk, params)
+// Need to select batch or build mode
+(batch ? cb.buildBatch(sdk, params) : cb.build(sdk, params))
   .then(() => deleteBranch(remote, BRANCH_NAME))
   .catch((err) => {
     deleteBranch(remote, BRANCH_NAME);
