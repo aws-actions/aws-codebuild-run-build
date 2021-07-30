@@ -263,8 +263,8 @@ describe("waitForBuildEndTime", () => {
     ];
     const logReplies = [{ events: [] }];
     const sdk = help(
-      () => buildReplies[count++],
-      () => logReplies[count - 1]
+      () => buildReplies[count - count++],
+      () => logReplies[0]
     );
 
     const test = await waitForBuildEndTime(sdk, {
@@ -273,6 +273,7 @@ describe("waitForBuildEndTime", () => {
     });
 
     expect(test).to.equal(buildReplies.pop().builds[0]);
+    expect(count).to.equal(2);
   });
 
   it("waits for a build endTime **and** no cloud watch log events", async function () {
@@ -296,10 +297,16 @@ describe("waitForBuildEndTime", () => {
           { id: buildID, logs: { cloudWatchLogsArn }, endTime: "endTime" },
         ],
       },
+      {
+        builds: [
+          { id: buildID, logs: { cloudWatchLogsArn }, endTime: "endTime" },
+        ],
+      },
     ];
     const logReplies = [
       undefined,
       { events: [{ message: "got one" }] },
+      { events: [] },
       { events: [] },
     ];
     const sdk = help(
@@ -312,6 +319,7 @@ describe("waitForBuildEndTime", () => {
       logs: { cloudWatchLogsArn: nullArn },
     });
     expect(test).to.equal(buildReplies.pop().builds[0]);
+    expect(count).to.equal(4);
   });
 
   it("waits after being rate limited and tries again", async function () {
@@ -331,6 +339,11 @@ describe("waitForBuildEndTime", () => {
           { id: buildID, logs: { cloudWatchLogsArn }, endTime: "endTime" },
         ],
       },
+      {
+        builds: [
+          { id: buildID, logs: { cloudWatchLogsArn }, endTime: "endTime" },
+        ],
+      },
     ];
 
     const sdk = help(
@@ -342,7 +355,7 @@ describe("waitForBuildEndTime", () => {
         return reply;
       },
       () => {
-        if (!buildReplies.length) {
+        if (buildReplies.length <= 1) {
           return { events: [] };
         }
 

@@ -34,13 +34,24 @@ async function build(sdk, params) {
   return waitForBuildEndTime(sdk, start.build);
 }
 
-async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
+async function waitForBuildEndTime(
+  sdk,
+  { id, logs },
+  seqEmptyLogs,
+  totalEvents,
+  throttleCount,
+  nextToken
+) {
   const {
     codeBuild,
     cloudWatchLogs,
     wait = 1000 * 30,
     backOff = 1000 * 15,
   } = sdk;
+
+  totalEvents = totalEvents || 0;
+  seqEmptyLogs = seqEmptyLogs || 0;
+  throttleCount = throttleCount || 0;
 
   // Get the CloudWatchLog info
   const startFromHead = true;
@@ -55,7 +66,12 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
     // The CloudWatchLog _may_ not be set up, only make the call if we have a logGroupName
     logGroupName &&
       cloudWatchLogs
-        .getLogEvents({ logGroupName, logStreamName, startFromHead, nextToken })
+        .getLogEvents({
+          logGroupName,
+          logStreamName,
+          startFromHead,
+          nextToken,
+        })
         .promise(),
   ]).catch((err) => {
     errObject = err;
@@ -72,6 +88,7 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
     if (errObject.message && errObject.message.search("Rate exceeded") !== -1) {
       //We were rate-limited, so add `backOff` seconds to the wait time
       let newWait = wait + backOff;
+      throttleCount++;
 
       //Sleep before trying again
       await new Promise((resolve) => setTimeout(resolve, newWait));
@@ -80,6 +97,9 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
       return waitForBuildEndTime(
         { ...sdk, wait: newWait },
         { id, logs },
+        seqEmptyLogs,
+        totalEvents,
+        throttleCount,
         nextToken
       );
     } else {
@@ -92,20 +112,42 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
   const [current] = batch.builds;
   const { nextForwardToken, events = [] } = cloudWatch;
 
+  // GetLogEvents can return partial/empty responses even when there is data.
+  // We wait for two consecutive empty log responses to minimize false positive on EOF.
+  // Empty response counter starts after any logs have been received, or when the build completes.
+  if (events.length == 0 && (totalEvents > 0 || current.endTime)) {
+    seqEmptyLogs++;
+  } else {
+    seqEmptyLogs = 0;
+  }
+  totalEvents += events.length;
+
   // stdout the CloudWatchLog (everyone likes progress...)
   // CloudWatchLogs have line endings.
   // I trim and then log each line
   // to ensure that the line ending is OS specific.
   events.forEach(({ message }) => console.log(message.trimEnd()));
 
-  // We did it! We can stop looking!
-  if (current.endTime && !events.length) return current;
+  // Stop after the build is ended and we've received two consecutive empty log responses
+  if (current.endTime && seqEmptyLogs >= 2) {
+    return current;
+  }
 
   // More to do: Sleep for a few seconds to avoid rate limiting
-  await new Promise((resolve) => setTimeout(resolve, wait));
+  // If never throttled and build is complete, halve CWL polling delay to minimize latency
+  await new Promise((resolve) =>
+    setTimeout(resolve, current.endTime && throttleCount == 0 ? wait / 2 : wait)
+  );
 
   // Try again
-  return waitForBuildEndTime(sdk, current, nextForwardToken);
+  return waitForBuildEndTime(
+    sdk,
+    current,
+    seqEmptyLogs,
+    totalEvents,
+    throttleCount,
+    nextForwardToken
+  );
 }
 
 function githubInputs() {
