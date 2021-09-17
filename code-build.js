@@ -225,10 +225,9 @@ function buildSdk() {
     customUserAgent: "aws-actions/aws-codebuild-run-build",
   });
 
-  assert(
-    codeBuild.config.credentials && cloudWatchLogs.config.credentials,
-    "No credentials. Try adding @aws-actions/configure-aws-credentials earlier in your job to set up AWS credentials."
-  );
+  if (codeBuild.config.credentials === null || cloudWatchLogs.config.credentials === null) {
+    console.log("If you might have credentials trouble, try adding @aws-actions/configure-aws-credentials earlier in your job to set up AWS credentials.")
+  }
 
   return { codeBuild, cloudWatchLogs };
 }
