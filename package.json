@@ -15,7 +15,7 @@
     "@actions/core": "^1.2.6",
     "@actions/exec": "^1.0.3",
     "@actions/github": "^2.1.1",
-    "aws-sdk": "^2.654.0",
+    "aws-sdk": "^2.814.0",
     "uuid": "^3.4.0",
     "yargs": "^15.3.1"
   },
