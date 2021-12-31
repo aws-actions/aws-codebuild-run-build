@@ -21,20 +21,23 @@ function runBuild() {
   const sdk = buildSdk();
 
   // Get input options for startBuild
-  const params = inputs2Parameters(githubInputs());
+  const [hideLog, p] = githubInputs();
 
-  return build(sdk, params);
+  const params = inputs2Parameters(p);
+
+  return build(sdk, params, hideLog);
 }
 
-async function build(sdk, params) {
+async function build(sdk, params, hideLog) {
   // Start the build
   const start = await sdk.codeBuild.startBuild(params).promise();
 
   // Wait for the build to "complete"
-  return waitForBuildEndTime(sdk, start.build);
+  return waitForBuildEndTime(hideLog, sdk, start.build);
 }
 
 async function waitForBuildEndTime(
+  hideLog,
   sdk,
   { id, logs },
   seqEmptyLogs,
@@ -59,12 +62,12 @@ async function waitForBuildEndTime(
   const { logGroupName, logStreamName } = logName(cloudWatchLogsArn);
 
   let errObject = false;
-
   // Check the state
   const [batch, cloudWatch = {}] = await Promise.all([
     codeBuild.batchGetBuilds({ ids: [id] }).promise(),
     // The CloudWatchLog _may_ not be set up, only make the call if we have a logGroupName
-    logGroupName &&
+    !hideLog &&
+      logGroupName &&
       cloudWatchLogs
         .getLogEvents({
           logGroupName,
@@ -95,6 +98,7 @@ async function waitForBuildEndTime(
 
       // Try again from the same token position
       return waitForBuildEndTime(
+        hideLog,
         { ...sdk, wait: newWait },
         { id, logs },
         seqEmptyLogs,
@@ -141,6 +145,7 @@ async function waitForBuildEndTime(
 
   // Try again
   return waitForBuildEndTime(
+    hideLog,
     sdk,
     current,
     seqEmptyLogs,
@@ -152,6 +157,7 @@ async function waitForBuildEndTime(
 
 function githubInputs() {
   const projectName = core.getInput("project-name", { required: true });
+  const hideLog = core.getInput("hide-log").toLowerCase() === "true";
   const { owner, repo } = github.context.repo;
   const { payload } = github.context;
   // The github.context.sha is evaluated on import.
@@ -175,14 +181,17 @@ function githubInputs() {
     .map((i) => i.trim())
     .filter((i) => i !== "");
 
-  return {
-    projectName,
-    owner,
-    repo,
-    sourceVersion,
-    buildspecOverride,
-    envPassthrough,
-  };
+  return [
+    hideLog,
+    {
+      projectName,
+      owner,
+      repo,
+      sourceVersion,
+      buildspecOverride,
+      envPassthrough,
+    },
+  ];
 }
 
 function inputs2Parameters(inputs) {

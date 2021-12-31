@@ -13,6 +13,10 @@ inputs:
   env-vars-for-codebuild:
     description: 'Comma separated list of environment variables to send to CodeBuild'
     required: false
+  hide-log:
+    description: 'Hide the log output'
+    required: false
+    default: 'false'
 outputs:
   aws-build-id:
     description: 'The AWS CodeBuild Build ID for this build.'
