@@ -22,6 +22,10 @@ The only required input is `project-name`.
    that CodeBuild requires.
    By default, the action uses the buildspec file location
    that you configured in the CodeBuild project.
+1. **image-override** (optional) :
+   The name of an image for this build that overrides the one specified
+   in the build project. By default, the action uses the default environment
+   that you configured in the CodeBuild project.
 1. **env-vars-for-codebuild** (optional) :
    A comma-separated list of the names of environment variables
    that the action passes from GitHub Actions to CodeBuild.
@@ -162,6 +166,7 @@ this will overwrite them.
   with:
     project-name: CodeBuildProjectName
     buildspec-override: path/to/buildspec.yaml
+    image-override: ecr-image-uri
     env-vars-for-codebuild: |
       custom,
       requester,
