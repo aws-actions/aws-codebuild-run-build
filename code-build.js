@@ -29,9 +29,7 @@ function runBuild() {
 async function build(sdk, params) {
   // Start the build
   const start = await sdk.codeBuild.startBuild(params).promise();
-
-  // Wait for the build to "complete"
-  return waitForBuildEndTime(sdk, start.build);
+  return start.build
 }
 
 async function waitForBuildEndTime(
