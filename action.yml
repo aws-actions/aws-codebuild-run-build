@@ -1,4 +1,4 @@
-name: '"AWS CodeBuild run build" Action For GitHub Actions'
+name: 'AWS Codebuild Async Trigger'
 description: 'Execute CodeBuild::startBuild for the current repo.'
 branding:
   icon: 'cloud'
