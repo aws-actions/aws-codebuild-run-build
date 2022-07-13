@@ -29,6 +29,13 @@ describe("logName", () => {
     expect(test).to.haveOwnProperty("logGroupName").and.to.equal(undefined);
     expect(test).to.haveOwnProperty("logStreamName").and.to.equal(undefined);
   });
+
+  it("return undefined when the Arn is undefined", () => {
+    const arn = undefined;
+    const test = logName(arn);
+    expect(test).to.haveOwnProperty("logGroupName").and.to.equal(undefined);
+    expect(test).to.haveOwnProperty("logStreamName").and.to.equal(undefined);
+  });
 });
 
 describe("githubInputs", () => {

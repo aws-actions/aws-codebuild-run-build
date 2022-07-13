@@ -234,13 +234,18 @@ function buildSdk() {
 }
 
 function logName(Arn) {
-  const [logGroupName, logStreamName] = Arn.split(":log-group:")
-    .pop()
-    .split(":log-stream:");
-  if (logGroupName === "null" || logStreamName === "null")
-    return {
-      logGroupName: undefined,
-      logStreamName: undefined,
-    };
-  return { logGroupName, logStreamName };
+  const logs = {
+    logGroupName: undefined,
+    logStreamName: undefined,
+  };
+  if (Arn) {
+    const [logGroupName, logStreamName] = Arn.split(":log-group:")
+      .pop()
+      .split(":log-stream:");
+    if (logGroupName !== "null" && logStreamName !== "null") {
+      logs.logGroupName = logGroupName;
+      logs.logStreamName = logStreamName;
+    }
+  }
+  return logs;
 }
