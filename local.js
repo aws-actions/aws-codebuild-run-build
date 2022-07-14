@@ -8,7 +8,7 @@ const cb = require("./code-build");
 const assert = require("assert");
 const yargs = require("yargs");
 
-const { projectName, buildspecOverride, imageOverride, envPassthrough, remote } = yargs
+const { projectName, buildspecOverride, computeTypeOverride, imageOverride, envPassthrough, remote } = yargs
   .option("project-name", {
     alias: "p",
     describe: "AWS CodeBuild Project Name",
@@ -18,6 +18,11 @@ const { projectName, buildspecOverride, imageOverride, envPassthrough, remote } 
   .option("buildspec-override", {
     alias: "b",
     describe: "Path to buildspec file",
+    type: "string",
+  })
+  .option("compute-type-override", {
+    alias: "c",
+    describe: "The name of a compute type for this build that overrides the one specified in the build project.",
     type: "string",
   })
   .option("image-override", {
@@ -44,6 +49,7 @@ const params = cb.inputs2Parameters({
   ...githubInfo(remote),
   sourceVersion: BRANCH_NAME,
   buildspecOverride,
+  computeTypeOverride,
   imageOverride,
   envPassthrough,
 });

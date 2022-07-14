@@ -10,6 +10,9 @@ inputs:
   buildspec-override:
     description: 'Buildspec Override'
     required: false
+  compute-type-override:
+    description: 'The name of a compute type for this build that overrides the one specified in the build project.'
+    required: false
   image-override:
     description: 'The name of an image for this build that overrides the one specified in the build project.'
     required: false

@@ -169,6 +169,9 @@ function githubInputs() {
   const buildspecOverride =
     core.getInput("buildspec-override", { required: false }) || undefined;
 
+  const computeTypeOverride =
+    core.getInput("compute-type-override", { required: false }) || undefined;
+
   const imageOverride = 
     core.getInput("image-override", { required: false }) || undefined;
 
@@ -184,6 +187,7 @@ function githubInputs() {
     repo,
     sourceVersion,
     buildspecOverride,
+    computeTypeOverride,
     imageOverride,
     envPassthrough,
   };
@@ -196,6 +200,7 @@ function inputs2Parameters(inputs) {
     repo,
     sourceVersion,
     buildspecOverride,
+    computeTypeOverride,
     imageOverride,
     envPassthrough = [],
   } = inputs;
@@ -217,6 +222,7 @@ function inputs2Parameters(inputs) {
     sourceTypeOverride,
     sourceLocationOverride,
     buildspecOverride,
+    computeTypeOverride,
     imageOverride,
     environmentVariablesOverride,
   };
