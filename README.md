@@ -25,6 +25,9 @@ The only required input is `project-name`.
 1. **compute-type-override** (optional) :
    The name of a compute type for this build that overrides the one specified
    in the build project.
+1. **environment-type-override** (optional) :
+   A container type for this build that overrides the one specified in the
+   build project.
 1. **image-override** (optional) :
    The name of an image for this build that overrides the one specified
    in the build project.
@@ -169,6 +172,7 @@ this will overwrite them.
     project-name: CodeBuildProjectName
     buildspec-override: path/to/buildspec.yaml
     compute-type-override: compute-type
+    environment-type-override: environment-type
     image-override: ecr-image-uri
     env-vars-for-codebuild: |
       custom,

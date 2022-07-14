@@ -172,6 +172,8 @@ function githubInputs() {
   const computeTypeOverride =
     core.getInput("compute-type-override", { required: false }) || undefined;
 
+  const environmentTypeOverride =
+    core.getInput("environment-type-override", { required: false }) || undefined;
   const imageOverride = 
     core.getInput("image-override", { required: false }) || undefined;
 
@@ -188,6 +190,7 @@ function githubInputs() {
     sourceVersion,
     buildspecOverride,
     computeTypeOverride,
+    environmentTypeOverride,
     imageOverride,
     envPassthrough,
   };
@@ -201,6 +204,7 @@ function inputs2Parameters(inputs) {
     sourceVersion,
     buildspecOverride,
     computeTypeOverride,
+    environmentTypeOverride,
     imageOverride,
     envPassthrough = [],
   } = inputs;
@@ -223,6 +227,7 @@ function inputs2Parameters(inputs) {
     sourceLocationOverride,
     buildspecOverride,
     computeTypeOverride,
+    environmentTypeOverride,
     imageOverride,
     environmentVariablesOverride,
   };
