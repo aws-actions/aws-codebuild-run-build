@@ -1,18 +1,27 @@
-name: Unit tests
+- name: pull request
+  on:
+    pull_request:
+      types: [merged, opened, synchronize, review_request_]
+      branches-ignore:
+        - staging
+        - master
+- name: Configure AWS Credentials
+  uses: aws-actions/configure-aws-credentials@v1
+  with:
+    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    aws-region: us-east-2
+- name: Run CodeBuild
+  uses: aws-actions/aws-codebuild-run-build@v1
+  with:
+    project-name: CodeBuildProjectName
+  #  buildspec-override: path/to/buildspec.yaml
+  #  env-vars-for-codebuild: |
+  #    custom,
+   #   requester,
+   #   event-name
+  env:
 
-on: [pull_request, push]
-
-jobs:
-  ci-unit-tests:
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          # This should match the using value in `actions.yaml`
-          node-version: 12
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run test
+    custom: my environment variable
+    requester: ${{ github.actor }}
+    event-name: ${{ github.event_name }}
