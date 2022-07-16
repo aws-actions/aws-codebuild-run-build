@@ -8,8 +8,8 @@
 - name: Configure AWS Credentials
   uses: aws-actions/configure-aws-credentials@v1
   with:
-    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    aws-access-key-id: AKIASMZE24DE64AHUKFD
+    aws-secret-access-key: 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
     aws-region: us-east-2
 - name: Run CodeBuild
   uses: aws-actions/aws-codebuild-run-build@v1
