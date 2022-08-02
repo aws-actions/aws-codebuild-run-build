@@ -205,6 +205,64 @@ describe("inputs2Parameters", () => {
     expect(shaEnv).to.haveOwnProperty("type").and.to.equal("PLAINTEXT");
   });
 
+  it("build override parameters for codeBuild.startBuild", () => {
+    // This is how GITHUB injects its input values.
+    // It would be nice if there was an easy way to test this...
+    process.env[`INPUT_PROJECT-NAME`] = projectName;
+    process.env[`GITHUB_REPOSITORY`] = repoInfo;
+    process.env[`GITHUB_SHA`] = sha;
+    const test = inputs2Parameters({
+      projectName,
+      sourceVersion: sha,
+      owner: "owner",
+      repo: "repo",
+      computeTypeOverride: "BUILD_GENERAL1_LARGE",
+      environmentTypeOverride: "LINUX_CONTAINER",
+      imageOverride: "111122223333.dkr.ecr.us-west-2.amazonaws.com/codebuild-docker-repo"
+    });
+    expect(test).to.haveOwnProperty("projectName").and.to.equal(projectName);
+    expect(test).to.haveOwnProperty("sourceVersion").and.to.equal(sha);
+    expect(test)
+      .to.haveOwnProperty("sourceTypeOverride")
+      .and.to.equal("GITHUB");
+    expect(test)
+      .to.haveOwnProperty("sourceLocationOverride")
+      .and.to.equal(`https://github.com/owner/repo.git`);
+    expect(test)
+      .to.haveOwnProperty("buildspecOverride")
+      .and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("computeTypeOverride")
+      .and.to.equal(`BUILD_GENERAL1_LARGE`);
+    expect(test)
+      .to.haveOwnProperty("environmentTypeOverride")
+      .and.to.equal(`LINUX_CONTAINER`);
+    expect(test)
+      .to.haveOwnProperty("imageOverride")
+      .and.to.equal(`111122223333.dkr.ecr.us-west-2.amazonaws.com/codebuild-docker-repo`);
+
+    // I send everything that starts 'GITHUB_'
+    expect(test)
+      .to.haveOwnProperty("environmentVariablesOverride")
+      .and.to.have.lengthOf.greaterThan(1);
+
+    const [repoEnv] = test.environmentVariablesOverride.filter(
+      ({ name }) => name === "GITHUB_REPOSITORY"
+    );
+    expect(repoEnv)
+      .to.haveOwnProperty("name")
+      .and.to.equal("GITHUB_REPOSITORY");
+    expect(repoEnv).to.haveOwnProperty("value").and.to.equal(repoInfo);
+    expect(repoEnv).to.haveOwnProperty("type").and.to.equal("PLAINTEXT");
+
+    const [shaEnv] = test.environmentVariablesOverride.filter(
+      ({ name }) => name === "GITHUB_SHA"
+    );
+    expect(shaEnv).to.haveOwnProperty("name").and.to.equal("GITHUB_SHA");
+    expect(shaEnv).to.haveOwnProperty("value").and.to.equal(sha);
+    expect(shaEnv).to.haveOwnProperty("type").and.to.equal("PLAINTEXT");
+  });
+
   it("can process env-vars-for-codebuild", () => {
     // This is how GITHUB injects its input values.
     // It would be nice if there was an easy way to test this...
