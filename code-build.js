@@ -169,6 +169,14 @@ function githubInputs() {
   const buildspecOverride =
     core.getInput("buildspec-override", { required: false }) || undefined;
 
+  const computeTypeOverride =
+    core.getInput("compute-type-override", { required: false }) || undefined;
+
+  const environmentTypeOverride =
+    core.getInput("environment-type-override", { required: false }) || undefined;
+  const imageOverride = 
+    core.getInput("image-override", { required: false }) || undefined;
+
   const envPassthrough = core
     .getInput("env-vars-for-codebuild", { required: false })
     .split(",")
@@ -181,6 +189,9 @@ function githubInputs() {
     repo,
     sourceVersion,
     buildspecOverride,
+    computeTypeOverride,
+    environmentTypeOverride,
+    imageOverride,
     envPassthrough,
   };
 }
@@ -192,6 +203,9 @@ function inputs2Parameters(inputs) {
     repo,
     sourceVersion,
     buildspecOverride,
+    computeTypeOverride,
+    environmentTypeOverride,
+    imageOverride,
     envPassthrough = [],
   } = inputs;
 
@@ -212,6 +226,9 @@ function inputs2Parameters(inputs) {
     sourceTypeOverride,
     sourceLocationOverride,
     buildspecOverride,
+    computeTypeOverride,
+    environmentTypeOverride,
+    imageOverride,
     environmentVariablesOverride,
   };
 }
@@ -234,13 +251,18 @@ function buildSdk() {
 }
 
 function logName(Arn) {
-  const [logGroupName, logStreamName] = Arn.split(":log-group:")
-    .pop()
-    .split(":log-stream:");
-  if (logGroupName === "null" || logStreamName === "null")
-    return {
-      logGroupName: undefined,
-      logStreamName: undefined,
-    };
-  return { logGroupName, logStreamName };
+  const logs = {
+    logGroupName: undefined,
+    logStreamName: undefined,
+  };
+  if (Arn) {
+    const [logGroupName, logStreamName] = Arn.split(":log-group:")
+      .pop()
+      .split(":log-stream:");
+    if (logGroupName !== "null" && logStreamName !== "null") {
+      logs.logGroupName = logGroupName;
+      logs.logStreamName = logStreamName;
+    }
+  }
+  return logs;
 }
