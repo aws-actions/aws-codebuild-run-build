@@ -233,7 +233,7 @@ we always pass the following parameters and values to CodeBuild in the StartBuil
 | `sourceTypeOverride`     | The string `'GITHUB'`                  |
 | `sourceLocationOverride` | The `HTTPS` git url for `context.repo` |
 
-If you want to disable sending the parameters `sourceTypeOverride` and `sourceLocationOverride` you can use `disable-source-override` input.
+If you want to disable sending the parameters `sourceVersion`, `sourceTypeOverride` and `sourceLocationOverride` you can use `disable-source-override` input.
 
 ### What we did not do
 

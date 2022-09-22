@@ -344,6 +344,8 @@ describe("inputs2Parameters", () => {
       disableSourceOverride: true,
     });
     expect(test).to.not.haveOwnProperty("sourceTypeOverride");
+    expect(test).to.not.haveOwnProperty("sourceLocationOverride");
+    expect(test).to.not.haveOwnProperty("sourceVersion");
   });
 });
 

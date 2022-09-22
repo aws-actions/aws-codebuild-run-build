@@ -215,6 +215,7 @@ function inputs2Parameters(inputs) {
 
   const sourceOverride = !disableSourceOverride
     ? {
+        sourceVersion: sourceVersion,
         sourceTypeOverride: "GITHUB",
         sourceLocationOverride: `https://github.com/${owner}/${repo}.git`,
       }
@@ -230,7 +231,6 @@ function inputs2Parameters(inputs) {
   // This way the GitHub events can manage the builds.
   return {
     projectName,
-    sourceVersion,
     ...sourceOverride,
     buildspecOverride,
     computeTypeOverride,
