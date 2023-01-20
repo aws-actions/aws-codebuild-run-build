@@ -173,8 +173,9 @@ function githubInputs() {
     core.getInput("compute-type-override", { required: false }) || undefined;
 
   const environmentTypeOverride =
-    core.getInput("environment-type-override", { required: false }) || undefined;
-  const imageOverride = 
+    core.getInput("environment-type-override", { required: false }) ||
+    undefined;
+  const imageOverride =
     core.getInput("image-override", { required: false }) || undefined;
 
   const envPassthrough = core
@@ -211,6 +212,7 @@ function inputs2Parameters(inputs) {
 
   const sourceTypeOverride = "GITHUB";
   const sourceLocationOverride = `https://github.com/${owner}/${repo}.git`;
+  const artifactsOverride = { type: "NO_ARTIFACTS" };
 
   const environmentVariablesOverride = Object.entries(process.env)
     .filter(
@@ -225,6 +227,7 @@ function inputs2Parameters(inputs) {
     sourceVersion,
     sourceTypeOverride,
     sourceLocationOverride,
+    artifactsOverride,
     buildspecOverride,
     computeTypeOverride,
     environmentTypeOverride,

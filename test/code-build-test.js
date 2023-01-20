@@ -71,8 +71,12 @@ describe("githubInputs", () => {
     expect(test)
       .to.haveOwnProperty("buildspecOverride")
       .and.to.equal(undefined);
-    expect(test).to.haveOwnProperty("computeTypeOverride").and.to.equal(undefined);
-    expect(test).to.haveOwnProperty("environmentTypeOverride").and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("computeTypeOverride")
+      .and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("environmentTypeOverride")
+      .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("imageOverride").and.to.equal(undefined);
     expect(test).to.haveOwnProperty("envPassthrough").and.to.deep.equal([]);
   });
@@ -88,7 +92,7 @@ describe("githubInputs", () => {
     process.env[`GITHUB_REPOSITORY`] = repoInfo;
     process.env[`GITHUB_SHA`] = sha;
 
-    process.env[`INPUT_ENV-VARS-FOR-CODEBUILD`] = `one, two 
+    process.env[`INPUT_ENV-VARS-FOR-CODEBUILD`] = `one, two
     , three,
     four    `;
 
@@ -123,8 +127,12 @@ describe("githubInputs", () => {
     expect(test)
       .to.haveOwnProperty("buildspecOverride")
       .and.to.equal(undefined);
-    expect(test).to.haveOwnProperty("computeTypeOverride").and.to.equal(undefined);
-    expect(test).to.haveOwnProperty("environmentTypeOverride").and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("computeTypeOverride")
+      .and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("environmentTypeOverride")
+      .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("imageOverride").and.to.equal(undefined);
     expect(test).to.haveOwnProperty("envPassthrough").and.to.deep.equal([]);
   });
@@ -177,10 +185,18 @@ describe("inputs2Parameters", () => {
       .to.haveOwnProperty("sourceLocationOverride")
       .and.to.equal(`https://github.com/owner/repo.git`);
     expect(test)
+      .to.haveOwnProperty("artifactsOverride")
+      .that.has.property("type")
+      .that.equals("NO_ARTIFACTS");
+    expect(test)
       .to.haveOwnProperty("buildspecOverride")
       .and.to.equal(undefined);
-    expect(test).to.haveOwnProperty("computeTypeOverride").and.to.equal(undefined);
-    expect(test).to.haveOwnProperty("environmentTypeOverride").and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("computeTypeOverride")
+      .and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("environmentTypeOverride")
+      .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("imageOverride").and.to.equal(undefined);
 
     // I send everything that starts 'GITHUB_'
@@ -218,7 +234,8 @@ describe("inputs2Parameters", () => {
       repo: "repo",
       computeTypeOverride: "BUILD_GENERAL1_LARGE",
       environmentTypeOverride: "LINUX_CONTAINER",
-      imageOverride: "111122223333.dkr.ecr.us-west-2.amazonaws.com/codebuild-docker-repo"
+      imageOverride:
+        "111122223333.dkr.ecr.us-west-2.amazonaws.com/codebuild-docker-repo",
     });
     expect(test).to.haveOwnProperty("projectName").and.to.equal(projectName);
     expect(test).to.haveOwnProperty("sourceVersion").and.to.equal(sha);
@@ -228,6 +245,10 @@ describe("inputs2Parameters", () => {
     expect(test)
       .to.haveOwnProperty("sourceLocationOverride")
       .and.to.equal(`https://github.com/owner/repo.git`);
+    expect(test)
+      .to.haveOwnProperty("artifactsOverride")
+      .that.has.property("type")
+      .that.equals("NO_ARTIFACTS");
     expect(test)
       .to.haveOwnProperty("buildspecOverride")
       .and.to.equal(undefined);
@@ -239,7 +260,9 @@ describe("inputs2Parameters", () => {
       .and.to.equal(`LINUX_CONTAINER`);
     expect(test)
       .to.haveOwnProperty("imageOverride")
-      .and.to.equal(`111122223333.dkr.ecr.us-west-2.amazonaws.com/codebuild-docker-repo`);
+      .and.to.equal(
+        `111122223333.dkr.ecr.us-west-2.amazonaws.com/codebuild-docker-repo`
+      );
 
     // I send everything that starts 'GITHUB_'
     expect(test)
@@ -270,7 +293,7 @@ describe("inputs2Parameters", () => {
     process.env[`GITHUB_REPOSITORY`] = repoInfo;
     process.env[`GITHUB_SHA`] = sha;
 
-    process.env[`INPUT_ENV-VARS-FOR-CODEBUILD`] = `one, two 
+    process.env[`INPUT_ENV-VARS-FOR-CODEBUILD`] = `one, two
     , three,
     four    `;
 
