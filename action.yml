@@ -22,6 +22,13 @@ inputs:
   env-vars-for-codebuild:
     description: 'Comma separated list of environment variables to send to CodeBuild'
     required: false
+  update-interval:
+    description: 'How often the action calls the API for updates'
+    required: false
+  update-back-off:
+    description: 'Back-off time for the update calls for API if rate-limiting is encountered'
+    required: false
+
 outputs:
   aws-build-id:
     description: 'The AWS CodeBuild Build ID for this build.'
