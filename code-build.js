@@ -89,8 +89,11 @@ async function waitForBuildEndTime(
   if (errObject) {
     //We caught an error in trying to make the AWS api call, and are now checking to see if it was just a rate limiting error
     if (errObject.message && errObject.message.search("Rate exceeded") !== -1) {
-      //We were rate-limited, so add `backOff` seconds to the wait time
-      let newWait = updateInterval + updateBackOff;
+      // We were rate-limited, so add backoff with Full Jitter, ref: https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+      let jitteredBackOff = Math.floor(
+        Math.random() * (updateBackOff * 2 ** throttleCount)
+      );
+      let newWait = updateInterval + jitteredBackOff;
       throttleCount++;
 
       //Sleep before trying again
