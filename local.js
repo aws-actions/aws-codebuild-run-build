@@ -16,6 +16,8 @@ const {
   imageOverride,
   envPassthrough,
   remote,
+  updateInterval,
+  updateBackOff,
 } = yargs
   .option("project-name", {
     alias: "p",
@@ -56,6 +58,17 @@ const {
     describe: "remote name to publish to",
     default: "origin",
     type: "string",
+  })
+  .option("update-interval", {
+    describe: "Interval in seconds between API calls for fetching updates",
+    default: 30,
+    type: "number",
+  })
+  .option("update-backoff", {
+    describe:
+      "Base update interval back-off value when encountering API rate-limiting",
+    default: 15,
+    type: "number",
   }).argv;
 
 const BRANCH_NAME = uuid();
@@ -71,11 +84,16 @@ const params = cb.inputs2Parameters({
   envPassthrough,
 });
 
+const config = {
+  updateInterval: updateInterval * 1000,
+  updateBackOff: updateBackOff * 1000,
+};
+
 const sdk = cb.buildSdk();
 
 pushBranch(remote, BRANCH_NAME);
 
-cb.build(sdk, params)
+cb.build(sdk, params, config)
   .then(() => deleteBranch(remote, BRANCH_NAME))
   .catch((err) => {
     deleteBranch(remote, BRANCH_NAME);
