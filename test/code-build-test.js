@@ -161,8 +161,8 @@ describe("githubInputs", () => {
     process.env[`INPUT_UPDATE-BACK-OFF`] = updateBackOff;
     process.env[`GITHUB_REPOSITORY`] = repoInfo;
     process.env[`GITHUB_SHA`] = sha;
-
-    require("@actions/github").context.payload = {};
+    const { context } = require("@actions/github");
+    context.payload = { pull_request: { head: { sha: pullRequestSha } } };
 
     const test = githubInputs();
 
