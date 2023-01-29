@@ -26,7 +26,7 @@ inputs:
     description: 'How often the action calls the API for updates'
     required: false
   update-back-off:
-    description: 'Back-off time for the update calls for API if rate-limiting is encountered'
+    description: 'Base back-off time for the update calls for API if rate-limiting is encountered'
     required: false
 
 outputs:

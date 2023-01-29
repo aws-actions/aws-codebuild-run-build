@@ -60,13 +60,14 @@ The only required input is `project-name`.
    The default value is 30.
 
 1. **update-back-off** (optional) :
-   Back-off time in seconds for the update interval.
+   Base back-off time in seconds for the update interval.
 
-   When API rate-limiting is hit, the back-off time will be added to the next update
-   interval.
+   When API rate-limiting is hit the back-off time, augmented with jitter, will be
+   added to the next update interval.
    E.g. with update interval of 30 and back-off time of 15, upon hitting the rate-limit
-   the next interval for the update call will be 45s and if the rate-limit is hit again
-   the next interval will be 60s and so on.
+   the next interval for the update call will be 30 + random_between(0, 15 _ 2 \*\* 0))
+   seconds and if the rate-limit is hit again the next interval will be
+   30 + random_between(0, 15 _ 2 \*\* 1) and so on.
 
    The default value is 15.
 
