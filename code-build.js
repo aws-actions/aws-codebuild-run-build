@@ -198,9 +198,15 @@ function githubInputs() {
     .filter((i) => i !== "");
 
   const updateInterval =
-    core.getInput("update-interval", { required: false }) || 1000 * 30;
+    parseInt(
+      core.getInput("update-interval", { required: false }) || "30",
+      10
+    ) * 1000;
   const updateBackOff =
-    core.getInput("update-back-off", { required: false }) || 1000 * 15;
+    parseInt(
+      core.getInput("update-back-off", { required: false }) || "15",
+      10
+    ) * 1000;
 
   return {
     projectName,

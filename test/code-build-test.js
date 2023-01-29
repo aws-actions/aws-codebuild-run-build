@@ -54,8 +54,8 @@ describe("githubInputs", () => {
   const sha = "1234abcd-12ab-34cd-56ef-1234567890ab";
   const pullRequestSha = "181600acb3cfb803f4570d0018928be5d730c00d";
 
-  const updateInterval = "5";
-  const updateBackOff = "10";
+  const updateInterval = 5;
+  const updateBackOff = 10;
 
   it("build basic parameters for codeBuild.startBuild", () => {
     // This is how GITHUB injects its input values.
@@ -157,8 +157,8 @@ describe("githubInputs", () => {
   });
   it("can handle configuring update call-rate", () => {
     process.env[`INPUT_PROJECT-NAME`] = projectName;
-    process.env[`INPUT_UPDATE-INTERVAL`] = updateInterval;
-    process.env[`INPUT_UPDATE-BACK-OFF`] = updateBackOff;
+    process.env[`INPUT_UPDATE-INTERVAL`] = `${updateInterval}`;
+    process.env[`INPUT_UPDATE-BACK-OFF`] = `${updateBackOff}`;
     process.env[`GITHUB_REPOSITORY`] = repoInfo;
     process.env[`GITHUB_SHA`] = sha;
     const { context } = require("@actions/github");
@@ -168,10 +168,10 @@ describe("githubInputs", () => {
 
     expect(test)
       .to.haveOwnProperty("updateInterval")
-      .and.to.equal(updateInterval);
+      .and.to.equal(updateInterval * 1000);
     expect(test)
       .to.haveOwnProperty("updateBackOff")
-      .and.to.equal(updateBackOff);
+      .and.to.equal(updateBackOff * 1000);
   });
 });
 
@@ -358,7 +358,7 @@ describe("inputs2Parameters", () => {
 });
 
 describe("waitForBuildEndTime", () => {
-  const defaultConfig = { updateInterval: 30, updateBackOff: 15 };
+  const defaultConfig = { updateInterval: 10, updateBackOff: 10 }; // NOTE: milliseconds
   it("basic usages", async () => {
     let count = 0;
     const buildID = "buildID";
