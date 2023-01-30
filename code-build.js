@@ -173,8 +173,9 @@ function githubInputs() {
     core.getInput("compute-type-override", { required: false }) || undefined;
 
   const environmentTypeOverride =
-    core.getInput("environment-type-override", { required: false }) || undefined;
-  const imageOverride = 
+    core.getInput("environment-type-override", { required: false }) ||
+    undefined;
+  const imageOverride =
     core.getInput("image-override", { required: false }) || undefined;
 
   const envPassthrough = core
