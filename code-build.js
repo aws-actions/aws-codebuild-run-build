@@ -166,7 +166,7 @@ async function waitForBuildEndTime(
 function githubInputs() {
   const projectName = core.getInput("project-name", { required: true });
   const disableSourceOverride =
-    core.getInput("disable-source-override") === "true";
+    core.getInput("disable-source-override", { required: false }) === "true";
   const { owner, repo } = github.context.repo;
   const { payload } = github.context;
   // The github.context.sha is evaluated on import.
