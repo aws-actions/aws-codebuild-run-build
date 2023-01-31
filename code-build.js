@@ -20,34 +20,37 @@ function runBuild() {
   // get a codeBuild instance from the SDK
   const sdk = buildSdk();
 
-  // Get input options for startBuild
-  const params = inputs2Parameters(githubInputs());
+  const inputs = githubInputs();
 
-  return build(sdk, params);
+  const config = (({ updateInterval, updateBackOff }) => ({
+    updateInterval,
+    updateBackOff,
+  }))(inputs);
+
+  // Get input options for startBuild
+  const params = inputs2Parameters(inputs);
+
+  return build(sdk, params, config);
 }
 
-async function build(sdk, params) {
+async function build(sdk, params, config) {
   // Start the build
   const start = await sdk.codeBuild.startBuild(params).promise();
 
   // Wait for the build to "complete"
-  return waitForBuildEndTime(sdk, start.build);
+  return waitForBuildEndTime(sdk, start.build, config);
 }
 
 async function waitForBuildEndTime(
   sdk,
   { id, logs },
+  { updateInterval, updateBackOff },
   seqEmptyLogs,
   totalEvents,
   throttleCount,
   nextToken
 ) {
-  const {
-    codeBuild,
-    cloudWatchLogs,
-    wait = 1000 * 30,
-    backOff = 1000 * 15,
-  } = sdk;
+  const { codeBuild, cloudWatchLogs } = sdk;
 
   totalEvents = totalEvents || 0;
   seqEmptyLogs = seqEmptyLogs || 0;
@@ -86,8 +89,11 @@ async function waitForBuildEndTime(
   if (errObject) {
     //We caught an error in trying to make the AWS api call, and are now checking to see if it was just a rate limiting error
     if (errObject.message && errObject.message.search("Rate exceeded") !== -1) {
-      //We were rate-limited, so add `backOff` seconds to the wait time
-      let newWait = wait + backOff;
+      // We were rate-limited, so add backoff with Full Jitter, ref: https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+      let jitteredBackOff = Math.floor(
+        Math.random() * (updateBackOff * 2 ** throttleCount)
+      );
+      let newWait = updateInterval + jitteredBackOff;
       throttleCount++;
 
       //Sleep before trying again
@@ -95,8 +101,9 @@ async function waitForBuildEndTime(
 
       // Try again from the same token position
       return waitForBuildEndTime(
-        { ...sdk, wait: newWait },
+        { ...sdk },
         { id, logs },
+        { updateInterval: newWait, updateBackOff },
         seqEmptyLogs,
         totalEvents,
         throttleCount,
@@ -136,13 +143,19 @@ async function waitForBuildEndTime(
   // More to do: Sleep for a few seconds to avoid rate limiting
   // If never throttled and build is complete, halve CWL polling delay to minimize latency
   await new Promise((resolve) =>
-    setTimeout(resolve, current.endTime && throttleCount == 0 ? wait / 2 : wait)
+    setTimeout(
+      resolve,
+      current.endTime && throttleCount == 0
+        ? updateInterval / 2
+        : updateInterval
+    )
   );
 
   // Try again
   return waitForBuildEndTime(
     sdk,
     current,
+    { updateInterval, updateBackOff },
     seqEmptyLogs,
     totalEvents,
     throttleCount,
@@ -175,8 +188,9 @@ function githubInputs() {
     core.getInput("compute-type-override", { required: false }) || undefined;
 
   const environmentTypeOverride =
-    core.getInput("environment-type-override", { required: false }) || undefined;
-  const imageOverride = 
+    core.getInput("environment-type-override", { required: false }) ||
+    undefined;
+  const imageOverride =
     core.getInput("image-override", { required: false }) || undefined;
 
   const envPassthrough = core
@@ -184,6 +198,17 @@ function githubInputs() {
     .split(",")
     .map((i) => i.trim())
     .filter((i) => i !== "");
+
+  const updateInterval =
+    parseInt(
+      core.getInput("update-interval", { required: false }) || "30",
+      10
+    ) * 1000;
+  const updateBackOff =
+    parseInt(
+      core.getInput("update-back-off", { required: false }) || "15",
+      10
+    ) * 1000;
 
   return {
     projectName,
@@ -195,6 +220,8 @@ function githubInputs() {
     environmentTypeOverride,
     imageOverride,
     envPassthrough,
+    updateInterval,
+    updateBackOff,
     disableSourceOverride,
   };
 }
@@ -237,6 +264,7 @@ function inputs2Parameters(inputs) {
     environmentTypeOverride,
     imageOverride,
     environmentVariablesOverride,
+    disableSourceOverride,
   };
 }
 

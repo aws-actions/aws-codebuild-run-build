@@ -32,7 +32,8 @@ The only required input is `project-name`.
    The name of an image for this build that overrides the one specified
    in the build project.
 1. **disable-source-override** (optional) :
-   Set to `true` if you want to disable providing `sourceTypeOverride` and `sourceLocationOverride` to CodeBuild.
+   Set to `true` if you want to disable providing `sourceVersion`,
+   `sourceTypeOverride` and `sourceLocationOverride` to CodeBuild.
 1. **env-vars-for-codebuild** (optional) :
    A comma-separated list of the names of environment variables
    that the action passes from GitHub Actions to CodeBuild.
@@ -47,6 +48,31 @@ The only required input is `project-name`.
    with the same name as one defined in your CodeBuild project,
    the one defined here replaces the one in the CodeBuild project.
    For a list of CodeBuild environment variables, see
+
+1. **update-interval** (optional) :
+   Update interval as seconds for how often the API is called to check on the status.
+
+   A higher value mitigates the chance of hitting API rate-limiting especially when
+   running many instances of this action in parallel, but also introduces a larger
+   potential time overhead (ranging from 0 to update interval) for the action to
+   fetch the build result and finish.
+
+   Lower value limits the potential time overhead worst case but it may hit the API
+   rate-limit more often, depending on the use-case.
+
+   The default value is 30.
+
+1. **update-back-off** (optional) :
+   Base back-off time in seconds for the update interval.
+
+   When API rate-limiting is hit the back-off time, augmented with jitter, will be
+   added to the next update interval.
+   E.g. with update interval of 30 and back-off time of 15, upon hitting the rate-limit
+   the next interval for the update call will be 30 + random_between(0, 15 _ 2 \*\* 0))
+   seconds and if the rate-limit is hit again the next interval will be
+   30 + random_between(0, 15 _ 2 \*\* 1) and so on.
+
+   The default value is 15.
 
 ### Outputs
 
