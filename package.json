@@ -2,11 +2,13 @@
   "name": "@aws-actions/codebuild-run-build",
   "version": "1.0.4",
   "description": "Execute CodeBuild::startBuild for the current repo.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "lint": "prettier -c *.js *.json *.md test/*.js; eslint **.js test/**.js",
     "format": "prettier --write -c *.js *.json *.md test/*.js; eslint --fix **.js test/**.js",
+    "format:check": "prettier --check -c *.js *.json *.md test/*.js; eslint --fix **.js test/**.js",
     "package": "ncc build index.js -o dist",
+    "build": "ncc build index.js -o dist",
     "test": "mocha"
   },
   "author": "aws-crypto-tools-team@amazon.com",
