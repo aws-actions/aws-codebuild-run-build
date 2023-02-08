@@ -46,6 +46,31 @@ The only required input is `project-name`.
    the one defined here replaces the one in the CodeBuild project.
    For a list of CodeBuild environment variables, see
 
+1. **update-interval** (optional) :
+   Update interval as seconds for how often the API is called to check on the status.
+
+   A higher value mitigates the chance of hitting API rate-limiting especially when
+   running many instances of this action in parallel, but also introduces a larger
+   potential time overhead (ranging from 0 to update interval) for the action to
+   fetch the build result and finish.
+
+   Lower value limits the potential time overhead worst case but it may hit the API
+   rate-limit more often, depending on the use-case.
+
+   The default value is 30.
+
+1. **update-back-off** (optional) :
+   Base back-off time in seconds for the update interval.
+
+   When API rate-limiting is hit the back-off time, augmented with jitter, will be
+   added to the next update interval.
+   E.g. with update interval of 30 and back-off time of 15, upon hitting the rate-limit
+   the next interval for the update call will be 30 + random_between(0, 15 _ 2 \*\* 0))
+   seconds and if the rate-limit is hit again the next interval will be
+   30 + random_between(0, 15 _ 2 \*\* 1) and so on.
+
+   The default value is 15.
+
 ### Outputs
 
 1. **aws-build-id** : The CodeBuild build ID of the build that the action ran.
@@ -220,7 +245,7 @@ Otherwise, it fails.
 
 In the call to StartBuild, we pass in all
 `GITHUB_` [environment variables][github environment variables] in the GitHub Actions environment,
-plus any environment variables that you specified in the `evn-passthrough` input value.
+plus any environment variables that you specified in the `env-passthrough` input value.
 
 Regardless of the project configuration in CodeBuild or GitHub Actions,
 we always pass the following parameters and values to CodeBuild in the StartBuild API call.
