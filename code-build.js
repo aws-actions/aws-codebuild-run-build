@@ -264,7 +264,6 @@ function inputs2Parameters(inputs) {
     environmentTypeOverride,
     imageOverride,
     environmentVariablesOverride,
-    disableSourceOverride,
   };
 }
 
