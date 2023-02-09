@@ -165,6 +165,8 @@ async function waitForBuildEndTime(
 
 function githubInputs() {
   const projectName = core.getInput("project-name", { required: true });
+  const disableSourceOverride =
+    core.getInput("disable-source-override", { required: false }) === "true";
   const { owner, repo } = github.context.repo;
   const { payload } = github.context;
   // The github.context.sha is evaluated on import.
@@ -220,6 +222,7 @@ function githubInputs() {
     envPassthrough,
     updateInterval,
     updateBackOff,
+    disableSourceOverride,
   };
 }
 
@@ -234,10 +237,16 @@ function inputs2Parameters(inputs) {
     environmentTypeOverride,
     imageOverride,
     envPassthrough = [],
+    disableSourceOverride,
   } = inputs;
 
-  const sourceTypeOverride = "GITHUB";
-  const sourceLocationOverride = `https://github.com/${owner}/${repo}.git`;
+  const sourceOverride = !disableSourceOverride
+    ? {
+        sourceVersion: sourceVersion,
+        sourceTypeOverride: "GITHUB",
+        sourceLocationOverride: `https://github.com/${owner}/${repo}.git`,
+      }
+    : {};
 
   const environmentVariablesOverride = Object.entries(process.env)
     .filter(
@@ -249,14 +258,13 @@ function inputs2Parameters(inputs) {
   // This way the GitHub events can manage the builds.
   return {
     projectName,
-    sourceVersion,
-    sourceTypeOverride,
-    sourceLocationOverride,
+    ...sourceOverride,
     buildspecOverride,
     computeTypeOverride,
     environmentTypeOverride,
     imageOverride,
     environmentVariablesOverride,
+    disableSourceOverride,
   };
 }
 

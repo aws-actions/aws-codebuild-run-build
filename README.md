@@ -31,6 +31,9 @@ The only required input is `project-name`.
 1. **image-override** (optional) :
    The name of an image for this build that overrides the one specified
    in the build project.
+1. **disable-source-override** (optional) :
+   Set to `true` if you want to disable providing `sourceVersion`,
+   `sourceTypeOverride` and `sourceLocationOverride` to CodeBuild.
 1. **env-vars-for-codebuild** (optional) :
    A comma-separated list of the names of environment variables
    that the action passes from GitHub Actions to CodeBuild.
@@ -247,7 +250,7 @@ In the call to StartBuild, we pass in all
 `GITHUB_` [environment variables][github environment variables] in the GitHub Actions environment,
 plus any environment variables that you specified in the `env-passthrough` input value.
 
-Regardless of the project configuration in CodeBuild or GitHub Actions,
+By default, regardless of the project configuration in CodeBuild or GitHub Actions,
 we always pass the following parameters and values to CodeBuild in the StartBuild API call.
 
 | CodeBuild value          | GitHub value                           |
@@ -255,6 +258,8 @@ we always pass the following parameters and values to CodeBuild in the StartBuil
 | `sourceVersion`          | The commit that triggered the workflow |
 | `sourceTypeOverride`     | The string `'GITHUB'`                  |
 | `sourceLocationOverride` | The `HTTPS` git url for `context.repo` |
+
+If you want to disable sending the parameters `sourceVersion`, `sourceTypeOverride` and `sourceLocationOverride` you can use `disable-source-override` input.
 
 ### What we did not do
 
