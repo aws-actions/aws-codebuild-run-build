@@ -230,7 +230,6 @@ describe("inputs2Parameters", () => {
       .to.haveOwnProperty("environmentTypeOverride")
       .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("imageOverride").and.to.equal(undefined);
-    expect(test).to.haveOwnProperty("disableSourceOverride").and.to.equal(undefined);
 
     // I send everything that starts 'GITHUB_'
     expect(test)
