@@ -248,7 +248,7 @@ Otherwise, it fails.
 
 In the call to StartBuild, we pass in all
 `GITHUB_` [environment variables][github environment variables] in the GitHub Actions environment,
-plus any environment variables that you specified in the `evn-passthrough` input value.
+plus any environment variables that you specified in the `env-passthrough` input value.
 
 By default, regardless of the project configuration in CodeBuild or GitHub Actions,
 we always pass the following parameters and values to CodeBuild in the StartBuild API call.
@@ -279,6 +279,12 @@ conformed to the environment variable length limits.
 For this reason, and to simplify what we expect to be the most common use-cases,
 we chose to start with the simplest possible configuration.
 If you find that these options don't meet your needs, please open an issue to let us know.
+
+## Release Process
+
+By creating a new Release a workflow is triggered creating a new commit which only contains `dist` and the `action.yml`. The necessary tags, i.e. for the release v1.0.7, the tag v1.0.7 is created and the v1.0 and v1 tags are updated.
+
+For the tagging and building the [build-and-tag](https://github.com/JasonEtco/build-and-tag-action) action by [Jason Etcovitch](https://github.com/JasonEtco) is used. It expects to have the main attribute and a build script to be set in the `package.json`. It then builds the code with the ncc compiler and creates the new tag/ updates existing tags for minor and major versions automatically.
 
 ## License
 
