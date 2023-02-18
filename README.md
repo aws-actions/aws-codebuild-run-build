@@ -68,11 +68,14 @@ The only required input is `project-name`.
    When API rate-limiting is hit the back-off time, augmented with jitter, will be
    added to the next update interval.
    E.g. with update interval of 30 and back-off time of 15, upon hitting the rate-limit
-   the next interval for the update call will be 30 + random_between(0, 15 _ 2 \*\* 0))
+   the next interval for the update call will be 30 + random*between(0, 15 * 2 \*\* 0))
    seconds and if the rate-limit is hit again the next interval will be
-   30 + random_between(0, 15 _ 2 \*\* 1) and so on.
+   30 + random*between(0, 15 * 2 \*\* 1) and so on.
 
    The default value is 15.
+
+1. **hide-cloudwatch-logs** (optional) :
+   Set to `true` if you do not want CloudWatch Logs to be streamed to GitHub Action.
 
 ### Outputs
 

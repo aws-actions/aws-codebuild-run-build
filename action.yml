@@ -31,6 +31,9 @@ inputs:
   disable-source-override:
     description: 'Set to `true` if you want do disable source repo override'
     required: false
+  hide-cloudwatch-logs:
+    description: 'Set to `true` to prevent the CloudWatch logs from streaming the output to GitHub'
+    required: false
 outputs:
   aws-build-id:
     description: 'The AWS CodeBuild Build ID for this build.'
