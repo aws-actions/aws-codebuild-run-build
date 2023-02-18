@@ -22,10 +22,10 @@ function runBuild() {
 
   const inputs = githubInputs();
 
-  const config = (({ updateInterval, updateBackOff, hideCloudwatchLogs }) => ({
+  const config = (({ updateInterval, updateBackOff, hideCloudWatchLogs }) => ({
     updateInterval,
     updateBackOff,
-    hideCloudwatchLogs,
+    hideCloudWatchLogs,
   }))(inputs);
 
   // Get input options for startBuild
@@ -45,7 +45,7 @@ async function build(sdk, params, config) {
 async function waitForBuildEndTime(
   sdk,
   { id, logs },
-  { updateInterval, updateBackOff, hideCloudwatchLogs },
+  { updateInterval, updateBackOff, hideCloudWatchLogs },
   seqEmptyLogs,
   totalEvents,
   throttleCount,
@@ -66,9 +66,9 @@ async function waitForBuildEndTime(
   // Check the state
   const [batch, cloudWatch = {}] = await Promise.all([
     codeBuild.batchGetBuilds({ ids: [id] }).promise(),
-    !hideCloudwatchLogs &&
+    !hideCloudWatchLogs &&
       logGroupName &&
-      cloudWatchLogs // only make the call if hideCloudwatchLogs is not enabled and a logGroupName exists
+      cloudWatchLogs // only make the call if hideCloudWatchLogs is not enabled and a logGroupName exists
         .getLogEvents({
           logGroupName,
           logStreamName,
@@ -155,7 +155,7 @@ async function waitForBuildEndTime(
   return waitForBuildEndTime(
     sdk,
     current,
-    { updateInterval, updateBackOff, hideCloudwatchLogs },
+    { updateInterval, updateBackOff, hideCloudWatchLogs },
     seqEmptyLogs,
     totalEvents,
     throttleCount,
@@ -210,8 +210,8 @@ function githubInputs() {
       10
     ) * 1000;
 
-  const hideCloudwatchLogs =
-    core.getInput("hide-cloudwatch-logs", { required: false }) || undefined;
+  const hideCloudWatchLogs =
+    core.getInput("hide-cloudwatch-logs", { required: false }) === "true";
 
   return {
     projectName,
@@ -226,7 +226,7 @@ function githubInputs() {
     updateInterval,
     updateBackOff,
     disableSourceOverride,
-    hideCloudwatchLogs,
+    hideCloudWatchLogs,
   };
 }
 

@@ -75,7 +75,7 @@ The only required input is `project-name`.
    The default value is 15.
 
 1. **hide-cloudwatch-logs** (optional) :
-   Set to `true` if you do not want CloudWatch logs to be streamed to GitHub Action.
+   Set to `true` if you do not want CloudWatch Logs to be streamed to GitHub Action.
 
 ### Outputs
 

@@ -82,6 +82,7 @@ describe("githubInputs", () => {
       .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("imageOverride").and.to.equal(undefined);
     expect(test).to.haveOwnProperty("envPassthrough").and.to.deep.equal([]);
+    expect(test).to.haveOwnProperty("hideCloudWatchLogs").and.to.equal(false);
   });
 
   it("a project name is required.", () => {
@@ -170,6 +171,7 @@ describe("githubInputs", () => {
       "No source version could be evaluated."
     );
   });
+
   it("can handle configuring update call-rate", () => {
     process.env[`INPUT_PROJECT-NAME`] = projectName;
     process.env[`INPUT_UPDATE-INTERVAL`] = `${updateInterval}`;
@@ -187,6 +189,19 @@ describe("githubInputs", () => {
     expect(test)
       .to.haveOwnProperty("updateBackOff")
       .and.to.equal(updateBackOff * 1000);
+  });
+
+  it("can hide cloudwatch logs when the parameter is set to true", () => {
+    // This is how GITHUB injects its input values.
+    // It would be nice if there was an easy way to test this...
+    process.env[`INPUT_PROJECT-NAME`] = projectName;
+    process.env[`INPUT_HIDE-CLOUDWATCH-LOGS`] = "true";
+    process.env[`GITHUB_REPOSITORY`] = repoInfo;
+    process.env[`GITHUB_SHA`] = sha;
+
+    const test = githubInputs();
+
+    expect(test).to.haveOwnProperty("hideCloudWatchLogs").and.to.equal(true);
   });
 });
 
