@@ -27,35 +27,35 @@ The only required input is `project-name`.
 
    ```
    - name: Run CodeBuild
-       uses: aws-actions/aws-codebuild-run-build@v1
-       with:
-          project-name: my-codebuild-job
-          disable-source-override: true
-          buildspec-override:   |
-            version: 0.2
-            phases:
-              install:
-                runtime-versions:
-                  nodejs: 16
-                commands:
-                  - npm install -g typescript
-                  - npm install
-              pre_build:
-                commands:
-                  - echo Installing source NPM dependencies...
-              build:
-                commands:
-                  - echo Build started on `date`
-                  - tsc
-                  - npm prune --production
-                post_build:
-                  commands:
-                    - echo Build completed on `date`  
-            artifacts:
-              type: zip
-              files:
-                - package.json
-                - package-lock.json
+     uses: aws-actions/aws-codebuild-run-build@v1
+     with:
+       project-name: my-codebuild-job
+       disable-source-override: true
+       buildspec-override:   |
+         version: 0.2
+         phases:
+           install:
+             runtime-versions:
+               nodejs: 16
+             commands:
+               - npm install -g typescript
+               - npm install
+           pre_build:
+             commands:
+               - echo Installing source NPM dependencies...
+           build:
+             commands:
+               - echo Build started on `date`
+               - tsc
+               - npm prune --production
+             post_build:
+               commands:
+                 - echo Build completed on `date`  
+         artifacts:
+           type: zip
+           files:
+             - package.json
+             - package-lock.json
    ```
 1. **compute-type-override** (optional) :
    The name of a compute type for this build that overrides the one specified
