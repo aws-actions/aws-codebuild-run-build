@@ -6,8 +6,10 @@ const {
   githubInputs,
   inputs2Parameters,
   waitForBuildEndTime,
+  buildSdk,
 } = require("../code-build");
 const { expect } = require("chai");
+const forEach = require("mocha-each");
 
 describe("logName", () => {
   it("return the logGroupName and logStreamName from an ARN", () => {
@@ -593,6 +595,18 @@ describe("waitForBuildEndTime", () => {
     }
 
     expect(didFail).to.equal(true);
+  });
+});
+
+describe("buildSdk", () => {
+  forEach([
+    "AWS_CONTAINER_CREDENTIALS_FULL_URI",
+    "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+  ]).it("return the codebuild client when env variable %s exists", (key) => {
+    process.env[key] = "testUri";
+    const test = buildSdk();
+    expect(test).to.haveOwnProperty("codeBuild");
+    expect(test).to.haveOwnProperty("cloudWatchLogs");
   });
 });
 
