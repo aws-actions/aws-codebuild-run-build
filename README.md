@@ -21,8 +21,8 @@ The only required input is `project-name`.
    The location (in this repository) of the [buildspec file][codebuild buildspec]
    that CodeBuild requires.
    By default, the action uses the buildspec file location
-   that you configured in the CodeBuild project. 
-  
+   that you configured in the CodeBuild project.
+
    Alternatively, you can pass in an inline buildspec definition like so:
 
    ```
@@ -50,13 +50,14 @@ The only required input is `project-name`.
                - npm prune --production
              post_build:
                commands:
-                 - echo Build completed on `date`  
+                 - echo Build completed on `date`
          artifacts:
            type: zip
            files:
              - package.json
              - package-lock.json
    ```
+
 1. **compute-type-override** (optional) :
    The name of a compute type for this build that overrides the one specified
    in the build project.
@@ -66,6 +67,8 @@ The only required input is `project-name`.
 1. **image-override** (optional) :
    The name of an image for this build that overrides the one specified
    in the build project.
+1. **image-pull-credentials-type-override** (optional) :
+   The type of credentials CodeBuild uses to pull images in your build.
 1. **disable-source-override** (optional) :
    Set to `true` if you want to disable providing `sourceVersion`,
    `sourceTypeOverride` and `sourceLocationOverride` to CodeBuild.

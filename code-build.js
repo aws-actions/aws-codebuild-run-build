@@ -190,8 +190,14 @@ function githubInputs() {
   const environmentTypeOverride =
     core.getInput("environment-type-override", { required: false }) ||
     undefined;
+
   const imageOverride =
     core.getInput("image-override", { required: false }) || undefined;
+
+  const imagePullCredentialsTypeOverride =
+    core.getInput("image-pull-credentials-type-override", {
+      required: false,
+    }) || undefined;
 
   const envPassthrough = core
     .getInput("env-vars-for-codebuild", { required: false })
@@ -222,6 +228,7 @@ function githubInputs() {
     computeTypeOverride,
     environmentTypeOverride,
     imageOverride,
+    imagePullCredentialsTypeOverride,
     envPassthrough,
     updateInterval,
     updateBackOff,
@@ -240,6 +247,7 @@ function inputs2Parameters(inputs) {
     computeTypeOverride,
     environmentTypeOverride,
     imageOverride,
+    imagePullCredentialsTypeOverride,
     envPassthrough = [],
     disableSourceOverride,
   } = inputs;
@@ -267,6 +275,7 @@ function inputs2Parameters(inputs) {
     computeTypeOverride,
     environmentTypeOverride,
     imageOverride,
+    imagePullCredentialsTypeOverride,
     environmentVariablesOverride,
   };
 }

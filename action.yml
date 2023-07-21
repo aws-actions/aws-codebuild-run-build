@@ -19,6 +19,9 @@ inputs:
   image-override:
     description: 'The name of an image for this build that overrides the one specified in the build project.'
     required: false
+  image-pull-credentials-type-override:
+    description: 'The type of credentials CodeBuild uses to pull images in your build.'
+    required: false
   env-vars-for-codebuild:
     description: 'Comma separated list of environment variables to send to CodeBuild'
     required: false

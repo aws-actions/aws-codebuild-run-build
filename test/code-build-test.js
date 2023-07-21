@@ -83,6 +83,9 @@ describe("githubInputs", () => {
       .to.haveOwnProperty("environmentTypeOverride")
       .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("imageOverride").and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("imagePullCredentialsTypeOverride")
+      .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("envPassthrough").and.to.deep.equal([]);
     expect(test).to.haveOwnProperty("hideCloudWatchLogs").and.to.equal(false);
   });
@@ -155,6 +158,9 @@ describe("githubInputs", () => {
       .to.haveOwnProperty("environmentTypeOverride")
       .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("imageOverride").and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("imagePullCredentialsTypeOverride")
+      .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("envPassthrough").and.to.deep.equal([]);
   });
 
@@ -247,6 +253,9 @@ describe("inputs2Parameters", () => {
       .to.haveOwnProperty("environmentTypeOverride")
       .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("imageOverride").and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("imagePullCredentialsTypeOverride")
+      .and.to.equal(undefined);
 
     // I send everything that starts 'GITHUB_'
     expect(test)
@@ -285,6 +294,7 @@ describe("inputs2Parameters", () => {
       environmentTypeOverride: "LINUX_CONTAINER",
       imageOverride:
         "111122223333.dkr.ecr.us-west-2.amazonaws.com/codebuild-docker-repo",
+      imagePullCredentialsTypeOverride: "CODEBUILD",
     });
     expect(test).to.haveOwnProperty("projectName").and.to.equal(projectName);
     expect(test).to.haveOwnProperty("sourceVersion").and.to.equal(sha);
@@ -308,6 +318,9 @@ describe("inputs2Parameters", () => {
       .and.to.equal(
         `111122223333.dkr.ecr.us-west-2.amazonaws.com/codebuild-docker-repo`
       );
+    expect(test)
+      .to.haveOwnProperty("imagePullCredentialsTypeOverride")
+      .and.to.equal(`CODEBUILD`);
 
     // I send everything that starts 'GITHUB_'
     expect(test)

@@ -14,6 +14,7 @@ const {
   computeTypeOverride,
   environmentTypeOverride,
   imageOverride,
+  imagePullCredentialsTypeOverride,
   envPassthrough,
   remote,
   updateInterval,
@@ -45,8 +46,14 @@ const {
   .option("image-override", {
     alias: "i",
     describe:
-      "The name of an image for this build that overrides the one specified in the build project.",
+      "The type of credentials CodeBuild uses to pull images in your build.",
     type: "string",
+  })
+  .option("image-pull-credentials-type-override", {
+    alias: "it",
+    describe:
+      "The name of an image for this build that overrides the one specified in the build project.",
+    choices: ["CODEBUILD", "SERVICE_ROLE"],
   })
   .option("env-vars-for-codebuild", {
     alias: "e",
@@ -81,6 +88,7 @@ const params = cb.inputs2Parameters({
   computeTypeOverride,
   environmentTypeOverride,
   imageOverride,
+  imagePullCredentialsTypeOverride,
   envPassthrough,
 });
 
