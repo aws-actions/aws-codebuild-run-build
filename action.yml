@@ -34,6 +34,9 @@ inputs:
   hide-cloudwatch-logs:
     description: 'Set to `true` to prevent the CloudWatch logs from streaming the output to GitHub'
     required: false
+  disable-github-env-vars:
+    description: 'Set to `true` if you want do disable github environment variables in codebuild'
+    required: false
 outputs:
   aws-build-id:
     description: 'The AWS CodeBuild Build ID for this build.'
