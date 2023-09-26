@@ -213,6 +213,9 @@ function githubInputs() {
   const hideCloudWatchLogs =
     core.getInput("hide-cloudwatch-logs", { required: false }) === "true";
 
+  const disableGithubEnvVars =
+    core.getInput("disable-github-env-vars", { required: false }) === "true";
+
   return {
     projectName,
     owner,
@@ -227,6 +230,7 @@ function githubInputs() {
     updateBackOff,
     disableSourceOverride,
     hideCloudWatchLogs,
+    disableGithubEnvVars,
   };
 }
 
@@ -242,6 +246,7 @@ function inputs2Parameters(inputs) {
     imageOverride,
     envPassthrough = [],
     disableSourceOverride,
+    disableGithubEnvVars,
   } = inputs;
 
   const sourceOverride = !disableSourceOverride
@@ -254,7 +259,9 @@ function inputs2Parameters(inputs) {
 
   const environmentVariablesOverride = Object.entries(process.env)
     .filter(
-      ([key]) => key.startsWith("GITHUB_") || envPassthrough.includes(key)
+      ([key]) =>
+        (!disableGithubEnvVars && key.startsWith("GITHUB_")) ||
+        envPassthrough.includes(key)
     )
     .map(([name, value]) => ({ name, value, type: "PLAINTEXT" }));
 
