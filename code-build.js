@@ -167,6 +167,8 @@ function githubInputs() {
   const projectName = core.getInput("project-name", { required: true });
   const disableSourceOverride =
     core.getInput("disable-source-override", { required: false }) === "true";
+  const disableGithubEnvVars =
+    core.getInput("disable-github-env-vars", { required: false }) === "true";
   const { owner, repo } = github.context.repo;
   const { payload } = github.context;
   // The github.context.sha is evaluated on import.
@@ -227,6 +229,7 @@ function githubInputs() {
     updateBackOff,
     disableSourceOverride,
     hideCloudWatchLogs,
+    disableGithubEnvVars,
   };
 }
 
@@ -242,6 +245,7 @@ function inputs2Parameters(inputs) {
     imageOverride,
     envPassthrough = [],
     disableSourceOverride,
+    disableGithubEnvVars,
   } = inputs;
 
   const sourceOverride = !disableSourceOverride
@@ -254,7 +258,9 @@ function inputs2Parameters(inputs) {
 
   const environmentVariablesOverride = Object.entries(process.env)
     .filter(
-      ([key]) => key.startsWith("GITHUB_") || envPassthrough.includes(key)
+      ([key]) =>
+        (!disableGithubEnvVars && key.startsWith("GITHUB_")) ||
+        envPassthrough.includes(key)
     )
     .map(([name, value]) => ({ name, value, type: "PLAINTEXT" }));
 
