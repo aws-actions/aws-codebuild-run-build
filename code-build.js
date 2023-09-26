@@ -167,8 +167,6 @@ function githubInputs() {
   const projectName = core.getInput("project-name", { required: true });
   const disableSourceOverride =
     core.getInput("disable-source-override", { required: false }) === "true";
-  const disableGithubEnvVars =
-    core.getInput("disable-github-env-vars", { required: false }) === "true";
   const { owner, repo } = github.context.repo;
   const { payload } = github.context;
   // The github.context.sha is evaluated on import.
@@ -214,6 +212,9 @@ function githubInputs() {
 
   const hideCloudWatchLogs =
     core.getInput("hide-cloudwatch-logs", { required: false }) === "true";
+
+  const disableGithubEnvVars =
+    core.getInput("disable-github-env-vars", { required: false }) === "true";
 
   return {
     projectName,
