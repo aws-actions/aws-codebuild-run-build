@@ -88,6 +88,7 @@ describe("githubInputs", () => {
       .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("envPassthrough").and.to.deep.equal([]);
     expect(test).to.haveOwnProperty("hideCloudWatchLogs").and.to.equal(false);
+    expect(test).to.haveOwnProperty("disableGithubEnvVars").and.to.equal(false);
   });
 
   it("a project name is required.", () => {
@@ -412,6 +413,29 @@ describe("inputs2Parameters", () => {
     expect(test).to.not.haveOwnProperty("sourceTypeOverride");
     expect(test).to.not.haveOwnProperty("sourceLocationOverride");
     expect(test).to.not.haveOwnProperty("sourceVersion");
+  });
+
+  it("can process disable-github-env-vars", () => {
+    process.env[`GITHUB_REPOSITORY`] = repoInfo;
+    process.env[`GITHUB_SHA`] = sha;
+
+    const test = inputs2Parameters({
+      projectName,
+      sourceVersion: sha,
+      owner: "owner",
+      repo: "repo",
+      disableGithubEnvVars: true,
+    });
+
+    const [repoEnv] = test.environmentVariablesOverride.filter(
+      ({ name }) => name === "GITHUB_REPOSITORY"
+    );
+    expect(repoEnv).to.equal(undefined);
+
+    const [shaEnv] = test.environmentVariablesOverride.filter(
+      ({ name }) => name === "GITHUB_SHA"
+    );
+    expect(shaEnv).to.equal(undefined);
   });
 });
 

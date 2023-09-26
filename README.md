@@ -115,6 +115,9 @@ The only required input is `project-name`.
 1. **hide-cloudwatch-logs** (optional) :
    Set to `true` if you do not want CloudWatch Logs to be streamed to GitHub Action.
 
+1. **disable-github-env-vars** (optional) :
+   Set to `true` if you want do disable github environment variables in codebuild.
+
 ### Outputs
 
 1. **aws-build-id** : The CodeBuild build ID of the build that the action ran.
