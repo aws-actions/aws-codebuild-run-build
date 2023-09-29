@@ -8,7 +8,18 @@ const cb = require("./code-build");
 const assert = require("assert");
 const yargs = require("yargs");
 
-const { projectName, buildspecOverride, computeTypeOverride, environmentTypeOverride, imageOverride, envPassthrough, remote } = yargs
+const {
+  projectName,
+  buildspecOverride,
+  computeTypeOverride,
+  environmentTypeOverride,
+  imageOverride,
+  imagePullCredentialsTypeOverride,
+  envPassthrough,
+  remote,
+  updateInterval,
+  updateBackOff,
+} = yargs
   .option("project-name", {
     alias: "p",
     describe: "AWS CodeBuild Project Name",
@@ -22,18 +33,27 @@ const { projectName, buildspecOverride, computeTypeOverride, environmentTypeOver
   })
   .option("compute-type-override", {
     alias: "c",
-    describe: "The name of a compute type for this build that overrides the one specified in the build project.",
+    describe:
+      "The name of a compute type for this build that overrides the one specified in the build project.",
     type: "string",
   })
   .option("environment-type-override", {
     alias: "et",
-    describe: "A container type for this build that overrides the one specified in the build project.",
+    describe:
+      "A container type for this build that overrides the one specified in the build project.",
     type: "string",
   })
   .option("image-override", {
     alias: "i",
-    describe: "The name of an image for this build that overrides the one specified in the build project.",
+    describe:
+      "The type of credentials CodeBuild uses to pull images in your build.",
     type: "string",
+  })
+  .option("image-pull-credentials-type-override", {
+    alias: "it",
+    describe:
+      "The name of an image for this build that overrides the one specified in the build project.",
+    choices: ["CODEBUILD", "SERVICE_ROLE"],
   })
   .option("env-vars-for-codebuild", {
     alias: "e",
@@ -45,6 +65,17 @@ const { projectName, buildspecOverride, computeTypeOverride, environmentTypeOver
     describe: "remote name to publish to",
     default: "origin",
     type: "string",
+  })
+  .option("update-interval", {
+    describe: "Interval in seconds between API calls for fetching updates",
+    default: 30,
+    type: "number",
+  })
+  .option("update-backoff", {
+    describe:
+      "Base update interval back-off value when encountering API rate-limiting",
+    default: 15,
+    type: "number",
   }).argv;
 
 const BRANCH_NAME = uuid();
@@ -57,14 +88,20 @@ const params = cb.inputs2Parameters({
   computeTypeOverride,
   environmentTypeOverride,
   imageOverride,
+  imagePullCredentialsTypeOverride,
   envPassthrough,
 });
+
+const config = {
+  updateInterval: updateInterval * 1000,
+  updateBackOff: updateBackOff * 1000,
+};
 
 const sdk = cb.buildSdk();
 
 pushBranch(remote, BRANCH_NAME);
 
-cb.build(sdk, params)
+cb.build(sdk, params, config)
   .then(() => deleteBranch(remote, BRANCH_NAME))
   .catch((err) => {
     deleteBranch(remote, BRANCH_NAME);

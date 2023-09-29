@@ -20,34 +20,38 @@ function runBuild() {
   // get a codeBuild instance from the SDK
   const sdk = buildSdk();
 
-  // Get input options for startBuild
-  const params = inputs2Parameters(githubInputs());
+  const inputs = githubInputs();
 
-  return build(sdk, params);
+  const config = (({ updateInterval, updateBackOff, hideCloudWatchLogs }) => ({
+    updateInterval,
+    updateBackOff,
+    hideCloudWatchLogs,
+  }))(inputs);
+
+  // Get input options for startBuild
+  const params = inputs2Parameters(inputs);
+
+  return build(sdk, params, config);
 }
 
-async function build(sdk, params) {
+async function build(sdk, params, config) {
   // Start the build
   const start = await sdk.codeBuild.startBuild(params).promise();
 
   // Wait for the build to "complete"
-  return waitForBuildEndTime(sdk, start.build);
+  return waitForBuildEndTime(sdk, start.build, config);
 }
 
 async function waitForBuildEndTime(
   sdk,
   { id, logs },
+  { updateInterval, updateBackOff, hideCloudWatchLogs },
   seqEmptyLogs,
   totalEvents,
   throttleCount,
   nextToken
 ) {
-  const {
-    codeBuild,
-    cloudWatchLogs,
-    wait = 1000 * 30,
-    backOff = 1000 * 15,
-  } = sdk;
+  const { codeBuild, cloudWatchLogs } = sdk;
 
   totalEvents = totalEvents || 0;
   seqEmptyLogs = seqEmptyLogs || 0;
@@ -59,13 +63,12 @@ async function waitForBuildEndTime(
   const { logGroupName, logStreamName } = logName(cloudWatchLogsArn);
 
   let errObject = false;
-
   // Check the state
   const [batch, cloudWatch = {}] = await Promise.all([
     codeBuild.batchGetBuilds({ ids: [id] }).promise(),
-    // The CloudWatchLog _may_ not be set up, only make the call if we have a logGroupName
-    logGroupName &&
-      cloudWatchLogs
+    !hideCloudWatchLogs &&
+      logGroupName &&
+      cloudWatchLogs // only make the call if hideCloudWatchLogs is not enabled and a logGroupName exists
         .getLogEvents({
           logGroupName,
           logStreamName,
@@ -86,8 +89,11 @@ async function waitForBuildEndTime(
   if (errObject) {
     //We caught an error in trying to make the AWS api call, and are now checking to see if it was just a rate limiting error
     if (errObject.message && errObject.message.search("Rate exceeded") !== -1) {
-      //We were rate-limited, so add `backOff` seconds to the wait time
-      let newWait = wait + backOff;
+      // We were rate-limited, so add backoff with Full Jitter, ref: https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+      let jitteredBackOff = Math.floor(
+        Math.random() * (updateBackOff * 2 ** throttleCount)
+      );
+      let newWait = updateInterval + jitteredBackOff;
       throttleCount++;
 
       //Sleep before trying again
@@ -95,8 +101,9 @@ async function waitForBuildEndTime(
 
       // Try again from the same token position
       return waitForBuildEndTime(
-        { ...sdk, wait: newWait },
+        { ...sdk },
         { id, logs },
+        { updateInterval: newWait, updateBackOff },
         seqEmptyLogs,
         totalEvents,
         throttleCount,
@@ -136,13 +143,19 @@ async function waitForBuildEndTime(
   // More to do: Sleep for a few seconds to avoid rate limiting
   // If never throttled and build is complete, halve CWL polling delay to minimize latency
   await new Promise((resolve) =>
-    setTimeout(resolve, current.endTime && throttleCount == 0 ? wait / 2 : wait)
+    setTimeout(
+      resolve,
+      current.endTime && throttleCount == 0
+        ? updateInterval / 2
+        : updateInterval
+    )
   );
 
   // Try again
   return waitForBuildEndTime(
     sdk,
     current,
+    { updateInterval, updateBackOff, hideCloudWatchLogs },
     seqEmptyLogs,
     totalEvents,
     throttleCount,
@@ -152,6 +165,8 @@ async function waitForBuildEndTime(
 
 function githubInputs() {
   const projectName = core.getInput("project-name", { required: true });
+  const disableSourceOverride =
+    core.getInput("disable-source-override", { required: false }) === "true";
   const { owner, repo } = github.context.repo;
   const { payload } = github.context;
   // The github.context.sha is evaluated on import.
@@ -175,14 +190,37 @@ function githubInputs() {
   const environmentTypeOverride =
     core.getInput("environment-type-override", { required: false }) ||
     undefined;
+
   const imageOverride =
     core.getInput("image-override", { required: false }) || undefined;
+
+  const imagePullCredentialsTypeOverride =
+    core.getInput("image-pull-credentials-type-override", {
+      required: false,
+    }) || undefined;
 
   const envPassthrough = core
     .getInput("env-vars-for-codebuild", { required: false })
     .split(",")
     .map((i) => i.trim())
     .filter((i) => i !== "");
+
+  const updateInterval =
+    parseInt(
+      core.getInput("update-interval", { required: false }) || "30",
+      10
+    ) * 1000;
+  const updateBackOff =
+    parseInt(
+      core.getInput("update-back-off", { required: false }) || "15",
+      10
+    ) * 1000;
+
+  const hideCloudWatchLogs =
+    core.getInput("hide-cloudwatch-logs", { required: false }) === "true";
+
+  const disableGithubEnvVars =
+    core.getInput("disable-github-env-vars", { required: false }) === "true";
 
   return {
     projectName,
@@ -193,7 +231,13 @@ function githubInputs() {
     computeTypeOverride,
     environmentTypeOverride,
     imageOverride,
+    imagePullCredentialsTypeOverride,
     envPassthrough,
+    updateInterval,
+    updateBackOff,
+    disableSourceOverride,
+    hideCloudWatchLogs,
+    disableGithubEnvVars,
   };
 }
 
@@ -207,16 +251,27 @@ function inputs2Parameters(inputs) {
     computeTypeOverride,
     environmentTypeOverride,
     imageOverride,
+    imagePullCredentialsTypeOverride,
     envPassthrough = [],
+    disableSourceOverride,
+    disableGithubEnvVars,
   } = inputs;
 
-  const sourceTypeOverride = "GITHUB";
-  const sourceLocationOverride = `https://github.com/${owner}/${repo}.git`;
+  const sourceOverride = !disableSourceOverride
+    ? {
+        sourceVersion: sourceVersion,
+        sourceTypeOverride: "GITHUB",
+        sourceLocationOverride: `https://github.com/${owner}/${repo}.git`,
+      }
+    : {};
+
   const artifactsOverride = { type: "NO_ARTIFACTS" };
 
   const environmentVariablesOverride = Object.entries(process.env)
     .filter(
-      ([key]) => key.startsWith("GITHUB_") || envPassthrough.includes(key)
+      ([key]) =>
+        (!disableGithubEnvVars && key.startsWith("GITHUB_")) ||
+        envPassthrough.includes(key)
     )
     .map(([name, value]) => ({ name, value, type: "PLAINTEXT" }));
 
@@ -224,14 +279,13 @@ function inputs2Parameters(inputs) {
   // This way the GitHub events can manage the builds.
   return {
     projectName,
-    sourceVersion,
-    sourceTypeOverride,
-    sourceLocationOverride,
-    artifactsOverride,
+    ...sourceOverride,
     buildspecOverride,
+    artifactsOverride,
     computeTypeOverride,
     environmentTypeOverride,
     imageOverride,
+    imagePullCredentialsTypeOverride,
     environmentVariablesOverride,
   };
 }
@@ -245,10 +299,16 @@ function buildSdk() {
     customUserAgent: "aws-actions/aws-codebuild-run-build",
   });
 
-  assert(
-    codeBuild.config.credentials && cloudWatchLogs.config.credentials,
-    "No credentials. Try adding @aws-actions/configure-aws-credentials earlier in your job to set up AWS credentials."
-  );
+  // check if environment variable exists for the container credential provider
+  if (
+    !process.env.AWS_CONTAINER_CREDENTIALS_FULL_URI &&
+    !process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
+  ) {
+    assert(
+      codeBuild.config.credentials && cloudWatchLogs.config.credentials,
+      "No credentials. Try adding @aws-actions/configure-aws-credentials earlier in your job to set up AWS credentials."
+    );
+  }
 
   return { codeBuild, cloudWatchLogs };
 }

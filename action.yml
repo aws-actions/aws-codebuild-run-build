@@ -19,12 +19,30 @@ inputs:
   image-override:
     description: 'The name of an image for this build that overrides the one specified in the build project.'
     required: false
+  image-pull-credentials-type-override:
+    description: 'The type of credentials CodeBuild uses to pull images in your build.'
+    required: false
   env-vars-for-codebuild:
     description: 'Comma separated list of environment variables to send to CodeBuild'
+    required: false
+  update-interval:
+    description: 'How often the action calls the API for updates'
+    required: false
+  update-back-off:
+    description: 'Base back-off time for the update calls for API if rate-limiting is encountered'
+    required: false
+  disable-source-override:
+    description: 'Set to `true` if you want do disable source repo override'
+    required: false
+  hide-cloudwatch-logs:
+    description: 'Set to `true` to prevent the CloudWatch logs from streaming the output to GitHub'
+    required: false
+  disable-github-env-vars:
+    description: 'Set to `true` if you want do disable github environment variables in codebuild'
     required: false
 outputs:
   aws-build-id:
     description: 'The AWS CodeBuild Build ID for this build.'
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'

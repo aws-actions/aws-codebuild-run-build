@@ -6,8 +6,10 @@ const {
   githubInputs,
   inputs2Parameters,
   waitForBuildEndTime,
+  buildSdk,
 } = require("../code-build");
 const { expect } = require("chai");
+const forEach = require("mocha-each");
 
 describe("logName", () => {
   it("return the logGroupName and logStreamName from an ARN", () => {
@@ -54,6 +56,9 @@ describe("githubInputs", () => {
   const sha = "1234abcd-12ab-34cd-56ef-1234567890ab";
   const pullRequestSha = "181600acb3cfb803f4570d0018928be5d730c00d";
 
+  const updateInterval = 5;
+  const updateBackOff = 10;
+
   it("build basic parameters for codeBuild.startBuild", () => {
     // This is how GITHUB injects its input values.
     // It would be nice if there was an easy way to test this...
@@ -78,7 +83,12 @@ describe("githubInputs", () => {
       .to.haveOwnProperty("environmentTypeOverride")
       .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("imageOverride").and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("imagePullCredentialsTypeOverride")
+      .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("envPassthrough").and.to.deep.equal([]);
+    expect(test).to.haveOwnProperty("hideCloudWatchLogs").and.to.equal(false);
+    expect(test).to.haveOwnProperty("disableGithubEnvVars").and.to.equal(false);
   });
 
   it("a project name is required.", () => {
@@ -108,6 +118,21 @@ describe("githubInputs", () => {
       .and.to.deep.equal(["one", "two", "three", "four"]);
   });
 
+  it("skips override when parameter is set to true", () => {
+    // This is how GITHUB injects its input values.
+    // It would be nice if there was an easy way to test this...
+    process.env[`INPUT_PROJECT-NAME`] = projectName;
+    process.env[`INPUT_DISABLE-SOURCE-OVERRIDE`] = "true";
+    process.env[`GITHUB_REPOSITORY`] = repoInfo;
+    process.env[`GITHUB_SHA`] = sha;
+
+    const test = githubInputs();
+
+    expect(test)
+      .to.haveOwnProperty("disableSourceOverride")
+      .and.to.deep.equal(true);
+  });
+
   it("can handle pull requests", () => {
     // This is how GITHUB injects its input values.
     // It would be nice if there was an easy way to test this...
@@ -134,6 +159,9 @@ describe("githubInputs", () => {
       .to.haveOwnProperty("environmentTypeOverride")
       .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("imageOverride").and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("imagePullCredentialsTypeOverride")
+      .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("envPassthrough").and.to.deep.equal([]);
   });
 
@@ -151,6 +179,38 @@ describe("githubInputs", () => {
     expect(() => githubInputs()).to.throw(
       "No source version could be evaluated."
     );
+  });
+
+  it("can handle configuring update call-rate", () => {
+    process.env[`INPUT_PROJECT-NAME`] = projectName;
+    process.env[`INPUT_UPDATE-INTERVAL`] = `${updateInterval}`;
+    process.env[`INPUT_UPDATE-BACK-OFF`] = `${updateBackOff}`;
+    process.env[`GITHUB_REPOSITORY`] = repoInfo;
+    process.env[`GITHUB_SHA`] = sha;
+    const { context } = require("@actions/github");
+    context.payload = { pull_request: { head: { sha: pullRequestSha } } };
+
+    const test = githubInputs();
+
+    expect(test)
+      .to.haveOwnProperty("updateInterval")
+      .and.to.equal(updateInterval * 1000);
+    expect(test)
+      .to.haveOwnProperty("updateBackOff")
+      .and.to.equal(updateBackOff * 1000);
+  });
+
+  it("can hide cloudwatch logs when the parameter is set to true", () => {
+    // This is how GITHUB injects its input values.
+    // It would be nice if there was an easy way to test this...
+    process.env[`INPUT_PROJECT-NAME`] = projectName;
+    process.env[`INPUT_HIDE-CLOUDWATCH-LOGS`] = "true";
+    process.env[`GITHUB_REPOSITORY`] = repoInfo;
+    process.env[`GITHUB_SHA`] = sha;
+
+    const test = githubInputs();
+
+    expect(test).to.haveOwnProperty("hideCloudWatchLogs").and.to.equal(true);
   });
 });
 
@@ -198,6 +258,9 @@ describe("inputs2Parameters", () => {
       .to.haveOwnProperty("environmentTypeOverride")
       .and.to.equal(undefined);
     expect(test).to.haveOwnProperty("imageOverride").and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("imagePullCredentialsTypeOverride")
+      .and.to.equal(undefined);
 
     // I send everything that starts 'GITHUB_'
     expect(test)
@@ -236,6 +299,7 @@ describe("inputs2Parameters", () => {
       environmentTypeOverride: "LINUX_CONTAINER",
       imageOverride:
         "111122223333.dkr.ecr.us-west-2.amazonaws.com/codebuild-docker-repo",
+      imagePullCredentialsTypeOverride: "CODEBUILD",
     });
     expect(test).to.haveOwnProperty("projectName").and.to.equal(projectName);
     expect(test).to.haveOwnProperty("sourceVersion").and.to.equal(sha);
@@ -263,6 +327,9 @@ describe("inputs2Parameters", () => {
       .and.to.equal(
         `111122223333.dkr.ecr.us-west-2.amazonaws.com/codebuild-docker-repo`
       );
+    expect(test)
+      .to.haveOwnProperty("imagePullCredentialsTypeOverride")
+      .and.to.equal(`CODEBUILD`);
 
     // I send everything that starts 'GITHUB_'
     expect(test)
@@ -342,9 +409,46 @@ describe("inputs2Parameters", () => {
     expect(fourEnv).to.haveOwnProperty("value").and.to.equal("_four_");
     expect(fourEnv).to.haveOwnProperty("type").and.to.equal("PLAINTEXT");
   });
+
+  it("can process disable-source-override", () => {
+    const test = inputs2Parameters({
+      projectName,
+      sourceVersion: sha,
+      owner: "owner",
+      repo: "repo",
+      disableSourceOverride: true,
+    });
+    expect(test).to.not.haveOwnProperty("sourceTypeOverride");
+    expect(test).to.not.haveOwnProperty("sourceLocationOverride");
+    expect(test).to.not.haveOwnProperty("sourceVersion");
+  });
+
+  it("can process disable-github-env-vars", () => {
+    process.env[`GITHUB_REPOSITORY`] = repoInfo;
+    process.env[`GITHUB_SHA`] = sha;
+
+    const test = inputs2Parameters({
+      projectName,
+      sourceVersion: sha,
+      owner: "owner",
+      repo: "repo",
+      disableGithubEnvVars: true,
+    });
+
+    const [repoEnv] = test.environmentVariablesOverride.filter(
+      ({ name }) => name === "GITHUB_REPOSITORY"
+    );
+    expect(repoEnv).to.equal(undefined);
+
+    const [shaEnv] = test.environmentVariablesOverride.filter(
+      ({ name }) => name === "GITHUB_SHA"
+    );
+    expect(shaEnv).to.equal(undefined);
+  });
 });
 
 describe("waitForBuildEndTime", () => {
+  const defaultConfig = { updateInterval: 10, updateBackOff: 10 }; // NOTE: milliseconds
   it("basic usages", async () => {
     let count = 0;
     const buildID = "buildID";
@@ -364,10 +468,14 @@ describe("waitForBuildEndTime", () => {
       () => logReplies[0]
     );
 
-    const test = await waitForBuildEndTime(sdk, {
-      id: buildID,
-      logs: { cloudWatchLogsArn },
-    });
+    const test = await waitForBuildEndTime(
+      sdk,
+      {
+        id: buildID,
+        logs: { cloudWatchLogsArn },
+      },
+      defaultConfig
+    );
 
     expect(test).to.equal(buildReplies.pop().builds[0]);
     expect(count).to.equal(2);
@@ -411,10 +519,15 @@ describe("waitForBuildEndTime", () => {
       () => logReplies[count - 1]
     );
 
-    const test = await waitForBuildEndTime(sdk, {
-      id: buildID,
-      logs: { cloudWatchLogsArn: nullArn },
-    });
+    const test = await waitForBuildEndTime(
+      sdk,
+      {
+        id: buildID,
+        logs: { cloudWatchLogsArn: nullArn },
+      },
+      defaultConfig
+    );
+
     expect(test).to.equal(buildReplies.pop().builds[0]);
     expect(count).to.equal(4);
   });
@@ -461,11 +574,12 @@ describe("waitForBuildEndTime", () => {
     );
 
     const test = await waitForBuildEndTime(
-      { ...sdk, wait: 1, backOff: 1 },
+      { ...sdk },
       {
         id: buildID,
         logs: { cloudWatchLogsArn: nullArn },
-      }
+      },
+      { updateInterval: 1, updateBackOff: 1 }
     );
 
     expect(test.id).to.equal(buildID);
@@ -513,11 +627,12 @@ describe("waitForBuildEndTime", () => {
 
     try {
       await waitForBuildEndTime(
-        { ...sdk, wait: 1, backOff: 1 },
+        { ...sdk },
         {
           id: buildID,
           logs: { cloudWatchLogsArn: nullArn },
-        }
+        },
+        defaultConfig
       );
     } catch (err) {
       didFail = true;
@@ -525,6 +640,18 @@ describe("waitForBuildEndTime", () => {
     }
 
     expect(didFail).to.equal(true);
+  });
+});
+
+describe("buildSdk", () => {
+  forEach([
+    "AWS_CONTAINER_CREDENTIALS_FULL_URI",
+    "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+  ]).it("return the codebuild client when env variable %s exists", (key) => {
+    process.env[key] = "testUri";
+    const test = buildSdk();
+    expect(test).to.haveOwnProperty("codeBuild");
+    expect(test).to.haveOwnProperty("cloudWatchLogs");
   });
 });
 
@@ -549,7 +676,7 @@ function help(builds, logs) {
     },
   };
 
-  return { codeBuild, cloudWatchLogs, wait: 10 };
+  return { codeBuild, cloudWatchLogs };
 
   function ret(thing) {
     if (typeof thing === "function") return thing();
