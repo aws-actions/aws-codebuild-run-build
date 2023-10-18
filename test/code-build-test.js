@@ -29,6 +29,13 @@ describe("logName", () => {
     expect(test).to.haveOwnProperty("logGroupName").and.to.equal(undefined);
     expect(test).to.haveOwnProperty("logStreamName").and.to.equal(undefined);
   });
+
+  it("return undefined when the Arn is undefined", () => {
+    const arn = undefined;
+    const test = logName(arn);
+    expect(test).to.haveOwnProperty("logGroupName").and.to.equal(undefined);
+    expect(test).to.haveOwnProperty("logStreamName").and.to.equal(undefined);
+  });
 });
 
 describe("githubInputs", () => {
@@ -47,6 +54,9 @@ describe("githubInputs", () => {
   const sha = "1234abcd-12ab-34cd-56ef-1234567890ab";
   const pullRequestSha = "181600acb3cfb803f4570d0018928be5d730c00d";
 
+  const updateInterval = 5;
+  const updateBackOff = 10;
+
   it("build basic parameters for codeBuild.startBuild", () => {
     // This is how GITHUB injects its input values.
     // It would be nice if there was an easy way to test this...
@@ -64,6 +74,13 @@ describe("githubInputs", () => {
     expect(test)
       .to.haveOwnProperty("buildspecOverride")
       .and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("computeTypeOverride")
+      .and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("environmentTypeOverride")
+      .and.to.equal(undefined);
+    expect(test).to.haveOwnProperty("imageOverride").and.to.equal(undefined);
     expect(test).to.haveOwnProperty("envPassthrough").and.to.deep.equal([]);
   });
 
@@ -113,6 +130,13 @@ describe("githubInputs", () => {
     expect(test)
       .to.haveOwnProperty("buildspecOverride")
       .and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("computeTypeOverride")
+      .and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("environmentTypeOverride")
+      .and.to.equal(undefined);
+    expect(test).to.haveOwnProperty("imageOverride").and.to.equal(undefined);
     expect(test).to.haveOwnProperty("envPassthrough").and.to.deep.equal([]);
   });
 
@@ -130,6 +154,24 @@ describe("githubInputs", () => {
     expect(() => githubInputs()).to.throw(
       "No source version could be evaluated."
     );
+  });
+  it("can handle configuring update call-rate", () => {
+    process.env[`INPUT_PROJECT-NAME`] = projectName;
+    process.env[`INPUT_UPDATE-INTERVAL`] = `${updateInterval}`;
+    process.env[`INPUT_UPDATE-BACK-OFF`] = `${updateBackOff}`;
+    process.env[`GITHUB_REPOSITORY`] = repoInfo;
+    process.env[`GITHUB_SHA`] = sha;
+    const { context } = require("@actions/github");
+    context.payload = { pull_request: { head: { sha: pullRequestSha } } };
+
+    const test = githubInputs();
+
+    expect(test)
+      .to.haveOwnProperty("updateInterval")
+      .and.to.equal(updateInterval * 1000);
+    expect(test)
+      .to.haveOwnProperty("updateBackOff")
+      .and.to.equal(updateBackOff * 1000);
   });
 });
 
@@ -166,6 +208,74 @@ describe("inputs2Parameters", () => {
     expect(test)
       .to.haveOwnProperty("buildspecOverride")
       .and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("computeTypeOverride")
+      .and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("environmentTypeOverride")
+      .and.to.equal(undefined);
+    expect(test).to.haveOwnProperty("imageOverride").and.to.equal(undefined);
+
+    // I send everything that starts 'GITHUB_'
+    expect(test)
+      .to.haveOwnProperty("environmentVariablesOverride")
+      .and.to.have.lengthOf.greaterThan(1);
+
+    const [repoEnv] = test.environmentVariablesOverride.filter(
+      ({ name }) => name === "GITHUB_REPOSITORY"
+    );
+    expect(repoEnv)
+      .to.haveOwnProperty("name")
+      .and.to.equal("GITHUB_REPOSITORY");
+    expect(repoEnv).to.haveOwnProperty("value").and.to.equal(repoInfo);
+    expect(repoEnv).to.haveOwnProperty("type").and.to.equal("PLAINTEXT");
+
+    const [shaEnv] = test.environmentVariablesOverride.filter(
+      ({ name }) => name === "GITHUB_SHA"
+    );
+    expect(shaEnv).to.haveOwnProperty("name").and.to.equal("GITHUB_SHA");
+    expect(shaEnv).to.haveOwnProperty("value").and.to.equal(sha);
+    expect(shaEnv).to.haveOwnProperty("type").and.to.equal("PLAINTEXT");
+  });
+
+  it("build override parameters for codeBuild.startBuild", () => {
+    // This is how GITHUB injects its input values.
+    // It would be nice if there was an easy way to test this...
+    process.env[`INPUT_PROJECT-NAME`] = projectName;
+    process.env[`GITHUB_REPOSITORY`] = repoInfo;
+    process.env[`GITHUB_SHA`] = sha;
+    const test = inputs2Parameters({
+      projectName,
+      sourceVersion: sha,
+      owner: "owner",
+      repo: "repo",
+      computeTypeOverride: "BUILD_GENERAL1_LARGE",
+      environmentTypeOverride: "LINUX_CONTAINER",
+      imageOverride:
+        "111122223333.dkr.ecr.us-west-2.amazonaws.com/codebuild-docker-repo",
+    });
+    expect(test).to.haveOwnProperty("projectName").and.to.equal(projectName);
+    expect(test).to.haveOwnProperty("sourceVersion").and.to.equal(sha);
+    expect(test)
+      .to.haveOwnProperty("sourceTypeOverride")
+      .and.to.equal("GITHUB");
+    expect(test)
+      .to.haveOwnProperty("sourceLocationOverride")
+      .and.to.equal(`https://github.com/owner/repo.git`);
+    expect(test)
+      .to.haveOwnProperty("buildspecOverride")
+      .and.to.equal(undefined);
+    expect(test)
+      .to.haveOwnProperty("computeTypeOverride")
+      .and.to.equal(`BUILD_GENERAL1_LARGE`);
+    expect(test)
+      .to.haveOwnProperty("environmentTypeOverride")
+      .and.to.equal(`LINUX_CONTAINER`);
+    expect(test)
+      .to.haveOwnProperty("imageOverride")
+      .and.to.equal(
+        `111122223333.dkr.ecr.us-west-2.amazonaws.com/codebuild-docker-repo`
+      );
 
     // I send everything that starts 'GITHUB_'
     expect(test)
@@ -248,6 +358,7 @@ describe("inputs2Parameters", () => {
 });
 
 describe("waitForBuildEndTime", () => {
+  const defaultConfig = { updateInterval: 10, updateBackOff: 10 }; // NOTE: milliseconds
   it("basic usages", async () => {
     let count = 0;
     const buildID = "buildID";
@@ -263,16 +374,21 @@ describe("waitForBuildEndTime", () => {
     ];
     const logReplies = [{ events: [] }];
     const sdk = help(
-      () => buildReplies[count++],
-      () => logReplies[count - 1]
+      () => buildReplies[count - count++],
+      () => logReplies[0]
     );
 
-    const test = await waitForBuildEndTime(sdk, {
-      id: buildID,
-      logs: { cloudWatchLogsArn },
-    });
+    const test = await waitForBuildEndTime(
+      sdk,
+      {
+        id: buildID,
+        logs: { cloudWatchLogsArn },
+      },
+      defaultConfig
+    );
 
     expect(test).to.equal(buildReplies.pop().builds[0]);
+    expect(count).to.equal(2);
   });
 
   it("waits for a build endTime **and** no cloud watch log events", async function () {
@@ -296,10 +412,16 @@ describe("waitForBuildEndTime", () => {
           { id: buildID, logs: { cloudWatchLogsArn }, endTime: "endTime" },
         ],
       },
+      {
+        builds: [
+          { id: buildID, logs: { cloudWatchLogsArn }, endTime: "endTime" },
+        ],
+      },
     ];
     const logReplies = [
       undefined,
       { events: [{ message: "got one" }] },
+      { events: [] },
       { events: [] },
     ];
     const sdk = help(
@@ -307,11 +429,17 @@ describe("waitForBuildEndTime", () => {
       () => logReplies[count - 1]
     );
 
-    const test = await waitForBuildEndTime(sdk, {
-      id: buildID,
-      logs: { cloudWatchLogsArn: nullArn },
-    });
+    const test = await waitForBuildEndTime(
+      sdk,
+      {
+        id: buildID,
+        logs: { cloudWatchLogsArn: nullArn },
+      },
+      defaultConfig
+    );
+
     expect(test).to.equal(buildReplies.pop().builds[0]);
+    expect(count).to.equal(4);
   });
 
   it("waits after being rate limited and tries again", async function () {
@@ -331,6 +459,11 @@ describe("waitForBuildEndTime", () => {
           { id: buildID, logs: { cloudWatchLogsArn }, endTime: "endTime" },
         ],
       },
+      {
+        builds: [
+          { id: buildID, logs: { cloudWatchLogsArn }, endTime: "endTime" },
+        ],
+      },
     ];
 
     const sdk = help(
@@ -342,7 +475,7 @@ describe("waitForBuildEndTime", () => {
         return reply;
       },
       () => {
-        if (!buildReplies.length) {
+        if (buildReplies.length <= 1) {
           return { events: [] };
         }
 
@@ -351,11 +484,12 @@ describe("waitForBuildEndTime", () => {
     );
 
     const test = await waitForBuildEndTime(
-      { ...sdk, wait: 1, backOff: 1 },
+      { ...sdk },
       {
         id: buildID,
         logs: { cloudWatchLogsArn: nullArn },
-      }
+      },
+      { updateInterval: 1, updateBackOff: 1 }
     );
 
     expect(test.id).to.equal(buildID);
@@ -403,11 +537,12 @@ describe("waitForBuildEndTime", () => {
 
     try {
       await waitForBuildEndTime(
-        { ...sdk, wait: 1, backOff: 1 },
+        { ...sdk },
         {
           id: buildID,
           logs: { cloudWatchLogsArn: nullArn },
-        }
+        },
+        defaultConfig
       );
     } catch (err) {
       didFail = true;
@@ -439,7 +574,7 @@ function help(builds, logs) {
     },
   };
 
-  return { codeBuild, cloudWatchLogs, wait: 10 };
+  return { codeBuild, cloudWatchLogs };
 
   function ret(thing) {
     if (typeof thing === "function") return thing();

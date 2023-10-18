@@ -20,27 +20,41 @@ function runBuild() {
   // get a codeBuild instance from the SDK
   const sdk = buildSdk();
 
-  // Get input options for startBuild
-  const params = inputs2Parameters(githubInputs());
+  const inputs = githubInputs();
 
-  return build(sdk, params);
+  const config = (({ updateInterval, updateBackOff }) => ({
+    updateInterval,
+    updateBackOff,
+  }))(inputs);
+
+  // Get input options for startBuild
+  const params = inputs2Parameters(inputs);
+
+  return build(sdk, params, config);
 }
 
-async function build(sdk, params) {
+async function build(sdk, params, config) {
   // Start the build
   const start = await sdk.codeBuild.startBuild(params).promise();
 
   // Wait for the build to "complete"
-  return waitForBuildEndTime(sdk, start.build);
+  return waitForBuildEndTime(sdk, start.build, config);
 }
 
-async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
-  const {
-    codeBuild,
-    cloudWatchLogs,
-    wait = 1000 * 30,
-    backOff = 1000 * 15,
-  } = sdk;
+async function waitForBuildEndTime(
+  sdk,
+  { id, logs },
+  { updateInterval, updateBackOff },
+  seqEmptyLogs,
+  totalEvents,
+  throttleCount,
+  nextToken
+) {
+  const { codeBuild, cloudWatchLogs } = sdk;
+
+  totalEvents = totalEvents || 0;
+  seqEmptyLogs = seqEmptyLogs || 0;
+  throttleCount = throttleCount || 0;
 
   // Get the CloudWatchLog info
   const startFromHead = true;
@@ -55,7 +69,12 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
     // The CloudWatchLog _may_ not be set up, only make the call if we have a logGroupName
     logGroupName &&
       cloudWatchLogs
-        .getLogEvents({ logGroupName, logStreamName, startFromHead, nextToken })
+        .getLogEvents({
+          logGroupName,
+          logStreamName,
+          startFromHead,
+          nextToken,
+        })
         .promise(),
   ]).catch((err) => {
     errObject = err;
@@ -70,16 +89,24 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
   if (errObject) {
     //We caught an error in trying to make the AWS api call, and are now checking to see if it was just a rate limiting error
     if (errObject.message && errObject.message.search("Rate exceeded") !== -1) {
-      //We were rate-limited, so add `backOff` seconds to the wait time
-      let newWait = wait + backOff;
+      // We were rate-limited, so add backoff with Full Jitter, ref: https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+      let jitteredBackOff = Math.floor(
+        Math.random() * (updateBackOff * 2 ** throttleCount)
+      );
+      let newWait = updateInterval + jitteredBackOff;
+      throttleCount++;
 
       //Sleep before trying again
       await new Promise((resolve) => setTimeout(resolve, newWait));
 
       // Try again from the same token position
       return waitForBuildEndTime(
-        { ...sdk, wait: newWait },
+        { ...sdk },
         { id, logs },
+        { updateInterval: newWait, updateBackOff },
+        seqEmptyLogs,
+        totalEvents,
+        throttleCount,
         nextToken
       );
     } else {
@@ -92,20 +119,48 @@ async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
   const [current] = batch.builds;
   const { nextForwardToken, events = [] } = cloudWatch;
 
+  // GetLogEvents can return partial/empty responses even when there is data.
+  // We wait for two consecutive empty log responses to minimize false positive on EOF.
+  // Empty response counter starts after any logs have been received, or when the build completes.
+  if (events.length == 0 && (totalEvents > 0 || current.endTime)) {
+    seqEmptyLogs++;
+  } else {
+    seqEmptyLogs = 0;
+  }
+  totalEvents += events.length;
+
   // stdout the CloudWatchLog (everyone likes progress...)
   // CloudWatchLogs have line endings.
   // I trim and then log each line
   // to ensure that the line ending is OS specific.
   events.forEach(({ message }) => console.log(message.trimEnd()));
 
-  // We did it! We can stop looking!
-  if (current.endTime && !events.length) return current;
+  // Stop after the build is ended and we've received two consecutive empty log responses
+  if (current.endTime && seqEmptyLogs >= 2) {
+    return current;
+  }
 
   // More to do: Sleep for a few seconds to avoid rate limiting
-  await new Promise((resolve) => setTimeout(resolve, wait));
+  // If never throttled and build is complete, halve CWL polling delay to minimize latency
+  await new Promise((resolve) =>
+    setTimeout(
+      resolve,
+      current.endTime && throttleCount == 0
+        ? updateInterval / 2
+        : updateInterval
+    )
+  );
 
   // Try again
-  return waitForBuildEndTime(sdk, current, nextForwardToken);
+  return waitForBuildEndTime(
+    sdk,
+    current,
+    { updateInterval, updateBackOff },
+    seqEmptyLogs,
+    totalEvents,
+    throttleCount,
+    nextForwardToken
+  );
 }
 
 function githubInputs() {
@@ -117,7 +172,7 @@ function githubInputs() {
   // So I use the raw ENV.
   // There is a complexity here because for pull request
   // the GITHUB_SHA value is NOT the correct value.
-  // See: https://github.com/sailthru/aws-codebuild-run-build/issues/36
+  // See: https://github.com/aws-actions/aws-codebuild-run-build/issues/36
   const sourceVersion =
     process.env[`GITHUB_EVENT_NAME`] === "pull_request"
       ? (((payload || {}).pull_request || {}).head || {}).sha
@@ -127,11 +182,31 @@ function githubInputs() {
   const buildspecOverride =
     core.getInput("buildspec-override", { required: false }) || undefined;
 
+  const computeTypeOverride =
+    core.getInput("compute-type-override", { required: false }) || undefined;
+
+  const environmentTypeOverride =
+    core.getInput("environment-type-override", { required: false }) ||
+    undefined;
+  const imageOverride =
+    core.getInput("image-override", { required: false }) || undefined;
+
   const envPassthrough = core
     .getInput("env-vars-for-codebuild", { required: false })
     .split(",")
     .map((i) => i.trim())
     .filter((i) => i !== "");
+
+  const updateInterval =
+    parseInt(
+      core.getInput("update-interval", { required: false }) || "30",
+      10
+    ) * 1000;
+  const updateBackOff =
+    parseInt(
+      core.getInput("update-back-off", { required: false }) || "15",
+      10
+    ) * 1000;
 
   return {
     projectName,
@@ -139,7 +214,12 @@ function githubInputs() {
     repo,
     sourceVersion,
     buildspecOverride,
+    computeTypeOverride,
+    environmentTypeOverride,
+    imageOverride,
     envPassthrough,
+    updateInterval,
+    updateBackOff,
   };
 }
 
@@ -150,8 +230,15 @@ function inputs2Parameters(inputs) {
     repo,
     sourceVersion,
     buildspecOverride,
+    computeTypeOverride,
+    environmentTypeOverride,
+    imageOverride,
     envPassthrough = [],
   } = inputs;
+
+  const sourceTypeOverride = "GITHUB";
+  const sourceLocationOverride = `https://github.com/${owner}/${repo}.git`;
+
   const environmentVariablesOverride = Object.entries(process.env)
     .filter(
       ([key]) => key.startsWith("GITHUB_") || envPassthrough.includes(key)
@@ -162,36 +249,47 @@ function inputs2Parameters(inputs) {
   // This way the GitHub events can manage the builds.
   return {
     projectName,
+    sourceVersion,
+    sourceTypeOverride,
+    sourceLocationOverride,
     buildspecOverride,
+    computeTypeOverride,
+    environmentTypeOverride,
+    imageOverride,
     environmentVariablesOverride,
   };
 }
 
 function buildSdk() {
   const codeBuild = new aws.CodeBuild({
-    customUserAgent: "sailthru/aws-codebuild-run-build",
+    customUserAgent: "aws-actions/aws-codebuild-run-build",
   });
 
   const cloudWatchLogs = new aws.CloudWatchLogs({
-    customUserAgent: "sailthru/aws-codebuild-run-build",
+    customUserAgent: "aws-actions/aws-codebuild-run-build",
   });
 
   assert(
     codeBuild.config.credentials && cloudWatchLogs.config.credentials,
-    "No credentials. Try adding @sailthru/configure-aws-credentials earlier in your job to set up AWS credentials."
+    "No credentials. Try adding @aws-actions/configure-aws-credentials earlier in your job to set up AWS credentials."
   );
 
   return { codeBuild, cloudWatchLogs };
 }
 
 function logName(Arn) {
-  const [logGroupName, logStreamName] = Arn.split(":log-group:")
-    .pop()
-    .split(":log-stream:");
-  if (logGroupName === "null" || logStreamName === "null")
-    return {
-      logGroupName: undefined,
-      logStreamName: undefined,
-    };
-  return { logGroupName, logStreamName };
+  const logs = {
+    logGroupName: undefined,
+    logStreamName: undefined,
+  };
+  if (Arn) {
+    const [logGroupName, logStreamName] = Arn.split(":log-group:")
+      .pop()
+      .split(":log-stream:");
+    if (logGroupName !== "null" && logStreamName !== "null") {
+      logs.logGroupName = logGroupName;
+      logs.logStreamName = logStreamName;
+    }
+  }
+  return logs;
 }
