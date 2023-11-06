@@ -46,6 +46,10 @@ inputs:
   artifacts-type-override:
       description: 'The type of build output artifact'
       required: false
+  stop-on-signals:
+    description: 'Comma separated list of process signals on which to stop the build. Default is SIGINT.'
+    required: false
+    default: 'SIGINT'
 outputs:
   aws-build-id:
     description: 'The AWS CodeBuild Build ID for this build.'
