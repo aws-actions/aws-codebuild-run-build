@@ -649,22 +649,14 @@ describe("buildSdk", () => {
 
 function help(builds, logs) {
   const codeBuild = {
-    batchGetBuilds() {
-      return {
-        async promise() {
-          return ret(builds);
-        },
-      };
+    async batchGetBuilds() {
+      return ret(builds);
     },
   };
 
   const cloudWatchLogs = {
-    getLogEvents() {
-      return {
-        async promise() {
-          return ret(logs);
-        },
-      };
+    async getLogEvents() {
+      return ret(logs);
     },
   };
 
