@@ -175,8 +175,11 @@ function githubInputs() {
   // There is a complexity here because for pull request
   // the GITHUB_SHA value is NOT the correct value.
   // See: https://github.com/aws-actions/aws-codebuild-run-build/issues/36
+
+  const eventName = process.env[`GITHUB_EVENT_NAME`];
+  const isPullRequest = ["pull_request", "pull_request_target"].includes(eventName);
   const sourceVersion =
-    process.env[`GITHUB_EVENT_NAME`] === "pull_request"
+      isPullRequest
       ? (((payload || {}).pull_request || {}).head || {}).sha
       : process.env[`GITHUB_SHA`];
 
