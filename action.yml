@@ -34,6 +34,9 @@ inputs:
   disable-source-override:
     description: 'Set to `true` if you want do disable source repo override'
     required: false
+  source-version-override:
+    description: 'The source version that overrides the sourceVersion provided to Codebuild.'
+    required: false
   hide-cloudwatch-logs:
     description: 'Set to `true` to prevent the CloudWatch logs from streaming the output to GitHub'
     required: false
