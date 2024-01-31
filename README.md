@@ -294,7 +294,7 @@ Otherwise, it fails.
 
 In the call to StartBuild, we pass in all
 `GITHUB_` [environment variables][github environment variables] in the GitHub Actions environment,
-plus any environment variables that you specified in the `env-passthrough` input value.
+plus any environment variables that you specified in the `env-vars-for-codebuild` input value.
 
 By default, regardless of the project configuration in CodeBuild or GitHub Actions,
 we always pass the following parameters and values to CodeBuild in the StartBuild API call.
