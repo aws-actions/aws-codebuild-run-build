@@ -120,6 +120,13 @@ The only required input is `project-name`.
 1. **disable-github-env-vars** (optional) :
    Set to `true` if you want do disable github environment variables in codebuild.
 
+1. **stop-on-signals** (optional) :
+   Comma-separated list of signals that will cause any started builds to be
+   stopped. The default value is `SIGINT`, which is what GitHub sends processes
+   when a workflow is cancelled. This means you can use concurrency settings or
+   other GitHub features that cause workflow cancellations without leaving
+   orphan builds running. Set to an empty string to disable.
+
 ### Outputs
 
 1. **aws-build-id** : The CodeBuild build ID of the build that the action ran.

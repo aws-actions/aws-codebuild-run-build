@@ -23,10 +23,16 @@ function runBuild() {
 
   const inputs = githubInputs();
 
-  const config = (({ updateInterval, updateBackOff, hideCloudWatchLogs }) => ({
+  const config = (({
     updateInterval,
     updateBackOff,
     hideCloudWatchLogs,
+    stopOnSignals,
+  }) => ({
+    updateInterval,
+    updateBackOff,
+    hideCloudWatchLogs,
+    stopOnSignals,
   }))(inputs);
 
   // Get input options for startBuild
@@ -39,8 +45,25 @@ async function build(sdk, params, config) {
   // Start the build
   const start = await sdk.codeBuild.startBuild(params);
 
+  // Set up signal handling to stop the build on cancellation
+  setupSignalHandlers(sdk, start.build.id, config.stopOnSignals);
+
   // Wait for the build to "complete"
   return waitForBuildEndTime(sdk, start.build, config);
+}
+
+function setupSignalHandlers(sdk, id, signals) {
+  signals.forEach((s) => {
+    core.info(`Installing signal handler for ${s}`);
+    process.on(s, async () => {
+      try {
+        core.info(`Caught ${s}, attempting to stop build...`);
+        await sdk.codeBuild.stopBuild({ id }).promise();
+      } catch (ex) {
+        core.error(`Error stopping build: ${ex}`);
+      }
+    });
+  });
 }
 
 async function waitForBuildEndTime(
@@ -226,6 +249,12 @@ function githubInputs() {
   const artifactsTypeOverride =
     core.getInput("artifacts-type-override", { required: false }) || undefined;
 
+  const stopOnSignals = core
+    .getInput("stop-on-signals", { required: false })
+    .split(",")
+    .map((i) => i.trim())
+    .filter((i) => i !== "");
+
   return {
     projectName,
     owner,
@@ -243,6 +272,7 @@ function githubInputs() {
     hideCloudWatchLogs,
     disableGithubEnvVars,
     artifactsTypeOverride,
+    stopOnSignals,
   };
 }
 
