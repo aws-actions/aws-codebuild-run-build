@@ -102,7 +102,7 @@ describe("githubInputs", () => {
     process.env[`GITHUB_REPOSITORY`] = repoInfo;
     process.env[`GITHUB_SHA`] = sha;
 
-    process.env[`INPUT_ENV-VARS-FOR-CODEBUILD`] = `one, two 
+    process.env[`INPUT_ENV-VARS-FOR-CODEBUILD`] = `one, two
     , three,
     four    `;
 
@@ -296,6 +296,7 @@ describe("inputs2Parameters", () => {
       imageOverride:
         "111122223333.dkr.ecr.us-west-2.amazonaws.com/codebuild-docker-repo",
       imagePullCredentialsTypeOverride: "CODEBUILD",
+      artifactsTypeOverride: "NO_ARTIFACTS",
     });
     expect(test).to.haveOwnProperty("projectName").and.to.equal(projectName);
     expect(test).to.haveOwnProperty("sourceVersion").and.to.equal(sha);
@@ -305,6 +306,10 @@ describe("inputs2Parameters", () => {
     expect(test)
       .to.haveOwnProperty("sourceLocationOverride")
       .and.to.equal(`https://github.com/owner/repo.git`);
+    expect(test)
+      .to.haveOwnProperty("artifactsOverride")
+      .that.has.property("type")
+      .that.equals("NO_ARTIFACTS");
     expect(test)
       .to.haveOwnProperty("buildspecOverride")
       .and.to.equal(undefined);
@@ -352,7 +357,7 @@ describe("inputs2Parameters", () => {
     process.env[`GITHUB_REPOSITORY`] = repoInfo;
     process.env[`GITHUB_SHA`] = sha;
 
-    process.env[`INPUT_ENV-VARS-FOR-CODEBUILD`] = `one, two 
+    process.env[`INPUT_ENV-VARS-FOR-CODEBUILD`] = `one, two
     , three,
     four    `;
 

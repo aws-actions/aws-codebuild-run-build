@@ -229,6 +229,9 @@ function githubInputs() {
   const disableGithubEnvVars =
     core.getInput("disable-github-env-vars", { required: false }) === "true";
 
+  const artifactsTypeOverride =
+    core.getInput("artifacts-type-override", { required: false }) || undefined;
+
   return {
     projectName,
     owner,
@@ -245,6 +248,7 @@ function githubInputs() {
     disableSourceOverride,
     hideCloudWatchLogs,
     disableGithubEnvVars,
+    artifactsTypeOverride,
   };
 }
 
@@ -262,6 +266,7 @@ function inputs2Parameters(inputs) {
     envPassthrough = [],
     disableSourceOverride,
     disableGithubEnvVars,
+    artifactsTypeOverride,
   } = inputs;
 
   const sourceOverride = !disableSourceOverride
@@ -269,6 +274,14 @@ function inputs2Parameters(inputs) {
         sourceVersion: sourceVersion,
         sourceTypeOverride: "GITHUB",
         sourceLocationOverride: `https://github.com/${owner}/${repo}.git`,
+      }
+    : {};
+
+  const artifactsOverride = artifactsTypeOverride
+    ? {
+        artifactsOverride: {
+          type: artifactsTypeOverride,
+        },
       }
     : {};
 
@@ -286,6 +299,7 @@ function inputs2Parameters(inputs) {
     projectName,
     ...sourceOverride,
     buildspecOverride,
+    ...artifactsOverride,
     computeTypeOverride,
     environmentTypeOverride,
     imageOverride,

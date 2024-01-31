@@ -43,6 +43,9 @@ inputs:
   disable-github-env-vars:
     description: 'Set to `true` if you want do disable github environment variables in codebuild'
     required: false
+  artifacts-type-override:
+      description: 'The type of build output artifact'
+      required: false
 outputs:
   aws-build-id:
     description: 'The AWS CodeBuild Build ID for this build.'
