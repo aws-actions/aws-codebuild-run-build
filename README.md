@@ -72,6 +72,8 @@ The only required input is `project-name`.
 1. **disable-source-override** (optional) :
    Set to `true` if you want to disable providing `sourceVersion`,
    `sourceTypeOverride` and `sourceLocationOverride` to CodeBuild.
+1. **source-version-override** (optional) :
+   The source version that overrides the `sourceVersion` provided to Codebuild.
 1. **env-vars-for-codebuild** (optional) :
    A comma-separated list of the names of environment variables
    that the action passes from GitHub Actions to CodeBuild.
