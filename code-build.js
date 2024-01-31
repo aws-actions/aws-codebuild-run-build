@@ -176,9 +176,10 @@ function githubInputs() {
   // the GITHUB_SHA value is NOT the correct value.
   // See: https://github.com/aws-actions/aws-codebuild-run-build/issues/36
   const sourceVersion =
-    process.env[`GITHUB_EVENT_NAME`] === "pull_request"
+    core.getInput("source-version-override", { required: false }) || 
+    (process.env[`GITHUB_EVENT_NAME`] === "pull_request"
       ? (((payload || {}).pull_request || {}).head || {}).sha
-      : process.env[`GITHUB_SHA`];
+      : process.env[`GITHUB_SHA`]);
 
   assert(sourceVersion, "No source version could be evaluated.");
   const buildspecOverride =
