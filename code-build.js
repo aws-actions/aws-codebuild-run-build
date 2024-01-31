@@ -3,7 +3,8 @@
 
 const core = require("@actions/core");
 const github = require("@actions/github");
-const aws = require("aws-sdk");
+const { CloudWatchLogs } = require("@aws-sdk/client-cloudwatch-logs");
+const { CodeBuild } = require("@aws-sdk/client-codebuild");
 const assert = require("assert");
 
 module.exports = {
@@ -36,7 +37,7 @@ function runBuild() {
 
 async function build(sdk, params, config) {
   // Start the build
-  const start = await sdk.codeBuild.startBuild(params).promise();
+  const start = await sdk.codeBuild.startBuild(params);
 
   // Wait for the build to "complete"
   return waitForBuildEndTime(sdk, start.build, config);
@@ -65,7 +66,7 @@ async function waitForBuildEndTime(
   let errObject = false;
   // Check the state
   const [batch, cloudWatch = {}] = await Promise.all([
-    codeBuild.batchGetBuilds({ ids: [id] }).promise(),
+    codeBuild.batchGetBuilds({ ids: [id] }),
     !hideCloudWatchLogs &&
       logGroupName &&
       cloudWatchLogs // only make the call if hideCloudWatchLogs is not enabled and a logGroupName exists
@@ -74,8 +75,7 @@ async function waitForBuildEndTime(
           logStreamName,
           startFromHead,
           nextToken,
-        })
-        .promise(),
+        }),
   ]).catch((err) => {
     errObject = err;
     /* Returning [] here so that the assignment above
@@ -289,11 +289,11 @@ function inputs2Parameters(inputs) {
 }
 
 function buildSdk() {
-  const codeBuild = new aws.CodeBuild({
+  const codeBuild = new CodeBuild({
     customUserAgent: "aws-actions/aws-codebuild-run-build",
   });
 
-  const cloudWatchLogs = new aws.CloudWatchLogs({
+  const cloudWatchLogs = new CloudWatchLogs({
     customUserAgent: "aws-actions/aws-codebuild-run-build",
   });
 
