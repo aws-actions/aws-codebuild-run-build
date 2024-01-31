@@ -58,7 +58,7 @@ function setupSignalHandlers(sdk, id, signals) {
     process.on(s, async () => {
       try {
         core.info(`Caught ${s}, attempting to stop build...`);
-        await sdk.codeBuild.stopBuild({ id }).promise();
+        await sdk.codeBuild.stopBuild({ id });
       } catch (ex) {
         core.error(`Error stopping build: ${ex}`);
       }
