@@ -54,5 +54,5 @@ outputs:
   aws-build-id:
     description: 'The AWS CodeBuild Build ID for this build.'
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
