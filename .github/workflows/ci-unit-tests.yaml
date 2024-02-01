@@ -8,11 +8,11 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           # This should match the using value in `actions.yaml`
-          node-version: 16
+          node-version: 20
       - run: npm ci
       - run: npm run lint
       - run: npm run test
