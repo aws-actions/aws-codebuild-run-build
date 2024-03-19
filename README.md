@@ -13,7 +13,7 @@ in the GitHub Actions job runner.
 
 ### Inputs
 
-This action offers three inputs that you can use to configure its behavior.
+This action offers following inputs that you can use to configure its behavior.
 The only required input is `project-name`.
 
 1. **project-name** (required) : The name of CodeBuild project you want to run.
@@ -126,6 +126,9 @@ The only required input is `project-name`.
    when a workflow is cancelled. This means you can use concurrency settings or
    other GitHub features that cause workflow cancellations without leaving
    orphan builds running. Set to an empty string to disable.
+
+1. **artifacts-type-override** (optional) :
+   If required, you can override the default behavior of CodeBuild artifacts. This feature is particularly useful for triggering CodeBuild projects configured within CodePipeline. You can set the artifacts to `NO_ARTIFACTS` in such cases
 
 ### Outputs
 
