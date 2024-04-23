@@ -171,6 +171,9 @@ that are impossible, difficult, or simply expensive
 to access from GitHub's hosted job runners
 but are easy or cheap to access from CodeBuild.
 
+### Related features
+🆕 [**Self-Hosted Runner in CodeBuild:**](https://docs.aws.amazon.com/codebuild/latest/userguide/action-runner.html) you can use CodeBuild to run ephemeral, self-hosted GitHub Actions runners. This allows you to leverage GitHub workflow ecosystem, while granting your workflow jobs native integration with AWS.
+
 ## Credentials and Permissions
 
 In order for the action to run your CodeBuild project,
