@@ -9,6 +9,8 @@ in the GitHub Actions job runner.
 
 [Security issue notifications](./CONTRIBUTING.md#security-issue-notifications)
 
+**Related feature**: [Self-Hosted Runner in CodeBuild](https://docs.aws.amazon.com/codebuild/latest/userguide/action-runner.html) allows GitHub Actions to integrate natively with AWS and access all compute platforms that CodeBuild offers, including Lambda, GPU-enhanced and Arm-based instances.
+
 ## Usage
 
 ### Inputs
@@ -170,9 +172,6 @@ Your workflow might require access to assets, configuration, or resources
 that are impossible, difficult, or simply expensive
 to access from GitHub's hosted job runners
 but are easy or cheap to access from CodeBuild.
-
-### Related features
-🆕 [**Self-Hosted Runner in CodeBuild:**](https://docs.aws.amazon.com/codebuild/latest/userguide/action-runner.html) you can use CodeBuild to run ephemeral, self-hosted GitHub Actions runners. This allows you to leverage GitHub workflow ecosystem, while granting your workflow jobs native integration with AWS.
 
 ## Credentials and Permissions
 
