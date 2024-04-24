@@ -9,6 +9,8 @@ in the GitHub Actions job runner.
 
 [Security issue notifications](./CONTRIBUTING.md#security-issue-notifications)
 
+[CodeBuild Managed GitHub Action runners](./#Related-features)
+
 ## Usage
 
 ### Inputs
