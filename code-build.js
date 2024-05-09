@@ -205,6 +205,13 @@ function githubInputs() {
       : process.env[`GITHUB_SHA`]);
 
   assert(sourceVersion, "No source version could be evaluated.");
+
+  const sourceTypeOverride = 
+    core.getInput("source-type-override", { required: false, }) || undefined;
+
+  const sourceLocationOverride =
+    core.getInput("source-location-override", { required: false }) || undefined;
+
   const buildspecOverride =
     core.getInput("buildspec-override", { required: false }) || undefined;
 
@@ -282,6 +289,8 @@ function inputs2Parameters(inputs) {
     owner,
     repo,
     sourceVersion,
+    sourceTypeOverride,
+    sourceLocationOverride,
     buildspecOverride,
     computeTypeOverride,
     environmentTypeOverride,
@@ -296,8 +305,8 @@ function inputs2Parameters(inputs) {
   const sourceOverride = !disableSourceOverride
     ? {
         sourceVersion: sourceVersion,
-        sourceTypeOverride: "GITHUB",
-        sourceLocationOverride: `https://github.com/${owner}/${repo}.git`,
+        sourceTypeOverride: sourceTypeOverride || "GITHUB",
+        sourceLocationOverride: sourceLocationOverride || `https://github.com/${owner}/${repo}.git`,
       }
     : {};
 
