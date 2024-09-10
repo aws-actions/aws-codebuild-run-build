@@ -16,4 +16,4 @@ jobs:
         uses: yamao-latte/aws-codebuild-run-build@45335c2205042a894288707014d83af6993beecd
         with:
           project-name: aws-codebuild-run-build
-          source-location-override: taoyong-ty/codebuild-helloworld
+          source-location-override: https://github.com/taoyong-ty/codebuild-helloworld
