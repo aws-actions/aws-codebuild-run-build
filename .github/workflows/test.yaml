@@ -13,7 +13,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
       - name: Run CodeBuild
-        uses: yamao-latte/aws-codebuild-run-build@45335c2205042a894288707014d83af6993beecd
+        uses: yamao-latte/aws-codebuild-run-build@37a96a5cafd1f26ab0d9a05c858d7c879c6ca997
         with:
           project-name: aws-codebuild-run-build
           source-location-override: https://github.com/taoyong-ty/codebuild-helloworld
