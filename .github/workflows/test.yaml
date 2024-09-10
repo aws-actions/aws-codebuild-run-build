@@ -13,6 +13,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
       - name: Run CodeBuild
-        uses: yamao-latte/aws-codebuild-run-build@support-github-enterprise-source
+        uses: yamao-latte/aws-codebuild-run-build@c42cb83e07332ee33de1267287b71031d1c237a6
         with:
           project-name: aws-codebuild-run-build
