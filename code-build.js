@@ -267,6 +267,8 @@ function githubInputs() {
     owner,
     repo,
     sourceVersion,
+    sourceTypeOverride,
+    sourceLocationOverride,
     buildspecOverride,
     computeTypeOverride,
     environmentTypeOverride,
