@@ -312,7 +312,10 @@ function inputs2Parameters(inputs) {
 
   const sourceOverride = !disableSourceOverride
     ? {
-        sourceVersion: sourceVersion,
+        // sourceVersion should not be set when using sourceTypeOverride or sourceLocationOverride
+        ...(sourceTypeOverride || sourceLocationOverride
+          ? {}
+          : {sourceVersion}),
         sourceTypeOverride: sourceTypeOverride || "GITHUB",
         sourceLocationOverride: sourceLocationOverride || `https://github.com/${owner}/${repo}.git`,
       }
