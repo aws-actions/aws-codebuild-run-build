@@ -420,6 +420,20 @@ describe("inputs2Parameters", () => {
     expect(test).to.not.haveOwnProperty("sourceVersion");
   });
 
+  it("can process source-type-override and source-location-override", () => {
+    const test = inputs2Parameters({
+      projectName,
+      sourceVersion: sha,
+      owner: "owner",
+      repo: "repo",
+      sourceTypeOverride: "S3",
+      sourceLocationOverride: "bucket-name/object-name",
+    });
+    expect(test).to.haveOwnProperty("sourceTypeOverride").and.to.equal("S3");
+    expect(test).to.haveOwnProperty("sourceLocationOverride").and.to.equal("bucket-name/object-name");
+    expect(test).to.not.haveOwnProperty("sourceVersion");
+  });
+
   it("can process disable-github-env-vars", () => {
     process.env[`GITHUB_REPOSITORY`] = repoInfo;
     process.env[`GITHUB_SHA`] = sha;

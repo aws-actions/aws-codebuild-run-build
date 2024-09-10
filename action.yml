@@ -37,6 +37,12 @@ inputs:
   source-version-override:
     description: 'The source version that overrides the sourceVersion provided to Codebuild.'
     required: false
+  source-type-override:
+    description: 'The source input type that overrides the source input defined in the build project for this build. Valid values include NO_SOURCE, CODECOMMIT, CODEPIPELINE, GITHUB, S3, BITBUCKET, and GITHUB_ENTERPRISE.'
+    required: false
+  source-location-override:
+   description: 'The location that overrides the source location defined in the build project for this build.'
+   required: false
   hide-cloudwatch-logs:
     description: 'Set to `true` to prevent the CloudWatch logs from streaming the output to GitHub'
     required: false
