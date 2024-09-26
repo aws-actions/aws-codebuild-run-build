@@ -76,7 +76,6 @@ async function waitForBuildEndTime(
   sdk,
   { id, logs },
   { updateInterval, updateBackOff, hideCloudWatchLogs },
-  seqEmptyLogs,
   totalEvents,
   throttleCount,
   nextToken
@@ -84,7 +83,6 @@ async function waitForBuildEndTime(
   const { codeBuild, cloudWatchLogs } = sdk;
 
   totalEvents = totalEvents || 0;
-  seqEmptyLogs = seqEmptyLogs || 0;
   throttleCount = throttleCount || 0;
 
   // Get the CloudWatchLog info
@@ -133,7 +131,6 @@ async function waitForBuildEndTime(
         { ...sdk },
         { id, logs },
         { updateInterval: newWait, updateBackOff },
-        seqEmptyLogs,
         totalEvents,
         throttleCount,
         nextToken
@@ -148,14 +145,6 @@ async function waitForBuildEndTime(
   const [current] = batch.builds;
   const { nextForwardToken, events = [] } = cloudWatch;
 
-  // GetLogEvents can return partial/empty responses even when there is data.
-  // We wait for two consecutive empty log responses to minimize false positive on EOF.
-  // Empty response counter starts after any logs have been received, or when the build completes.
-  if (events.length == 0 && (totalEvents > 0 || current.endTime)) {
-    seqEmptyLogs++;
-  } else {
-    seqEmptyLogs = 0;
-  }
   totalEvents += events.length;
 
   // stdout the CloudWatchLog (everyone likes progress...)
@@ -165,7 +154,7 @@ async function waitForBuildEndTime(
   events.forEach(({ message }) => console.log(message.trimEnd()));
 
   // Stop after the build is ended and we've received two consecutive empty log responses
-  if (current.endTime && seqEmptyLogs >= 2) {
+  if (current.endTime && nextForwardToken == nextToken) {
     return current;
   }
 
@@ -185,7 +174,6 @@ async function waitForBuildEndTime(
     sdk,
     current,
     { updateInterval, updateBackOff, hideCloudWatchLogs },
-    seqEmptyLogs,
     totalEvents,
     throttleCount,
     nextForwardToken
