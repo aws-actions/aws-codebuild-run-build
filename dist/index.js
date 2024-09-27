@@ -157,6 +157,11 @@ async function waitForBuildEndTime(
     seqEmptyLogs = 0;
   }
   totalEvents += events.length;
+  console.log("========datetime: " + Date.now());
+  console.log("========total: " + totalEvents);
+  console.log("========seqEmptyLogs: " + seqEmptyLogs);
+  console.log("========current.endTime: " + current.endTime);
+  console.log("========nextForwardToken: " + nextForwardToken);
 
   // stdout the CloudWatchLog (everyone likes progress...)
   // CloudWatchLogs have line endings.
