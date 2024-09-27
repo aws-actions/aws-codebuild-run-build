@@ -13,7 +13,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
       - name: Run CodeBuild
-        uses: taoyong-ty/aws-codebuild-run-build@68607d6a8379ed596627a0026061c3b9b3c88909
+        uses: taoyong-ty/aws-codebuild-run-build@48c2aefe119fa3636b8e25bbd5e549829ca664b3
         with:
           project-name: aws-codebuild-run-build
 
