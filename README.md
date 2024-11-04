@@ -1,5 +1,7 @@
 ## AWS CodeBuild Run Build for GitHub Actions
 
+### Making a local change
+
 This action runs a [AWS CodeBuild][codebuild] [project][codebuild project]
 as a step in a GitHub Actions workflow job.
 
