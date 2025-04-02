@@ -7,7 +7,6 @@ const cp = require("child_process");
 const cb = require("./code-build");
 const assert = require("assert");
 const yargs = require("yargs");
-const { log } = require("console");
 
 const {
   projectName,
