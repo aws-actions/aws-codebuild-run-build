@@ -7,6 +7,7 @@ const cp = require("child_process");
 const cb = require("./code-build");
 const assert = require("assert");
 const yargs = require("yargs");
+const { log } = require("console");
 
 const {
   projectName,
@@ -117,10 +118,10 @@ function deleteBranch(remote, branchName) {
 }
 
 function githubInfo(remote) {
-  const gitHubSSH = "git@github.com:";
-  const gitHubHTTPS = "https://github.com/";
+  const repoSSH = "git@";
+  const repoHTTPS = "https://";
   /* Expecting to match something like:
-   * 'fork    git@github.com:seebees/aws-codebuild-run-build.git (push)'
+   * 'fork    git@<hostname>:seebees/aws-codebuild-run-build.git (push)'
    * Which is the output of `git remote -v`
    */
   const remoteMatch = new RegExp(`^${remote}.*\\(push\\)$`);
@@ -137,11 +138,13 @@ function githubInfo(remote) {
     .filter((line) => line.trim().match(remoteMatch));
   assert(gitRemote, `No remote found named ${remote}`);
   const [, url] = gitRemote.split(/[\t ]/);
-  if (url.startsWith(gitHubHTTPS)) {
-    const [owner, repo] = url.slice(gitHubHTTPS.length, -4).split("/");
+  if (url.startsWith(repoHTTPS)) {
+    const [owner, repo] = url.slice(repoHTTPS.length, -4).split("/").slice(-2);
+    console.log(`owner: ${owner}, repo: ${repo}`);
     return { owner, repo };
-  } else if (url.startsWith(gitHubSSH)) {
-    const [owner, repo] = url.slice(gitHubSSH.length, -4).split("/");
+  } else if (url.startsWith(repoSSH)) {
+    const [owner, repo] = url.slice(repoSSH.length, -4).split(':').pop().split("/");
+    console.log(`owner: ${owner}, repo: ${repo}`);
     return { owner, repo };
   } else {
     throw new Error(`Unsupported format: ${url}`);
