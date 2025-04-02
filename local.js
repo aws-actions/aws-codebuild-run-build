@@ -138,15 +138,21 @@ function githubInfo(remote) {
     .filter((line) => line.trim().match(remoteMatch));
   assert(gitRemote, `No remote found named ${remote}`);
   const [, url] = gitRemote.split(/[\t ]/);
+  const url_path_elements = [];
+  
   if (url.startsWith(repoHTTPS)) {
-    const [owner, repo] = url.slice(repoHTTPS.length, -4).split("/").slice(-2);
-    console.log(`owner: ${owner}, repo: ${repo}`);
-    return { owner, repo };
+    url_path_elements.push(...url.slice(repoHTTPS.length, -4).split("/"));
   } else if (url.startsWith(repoSSH)) {
-    const [owner, repo] = url.slice(repoSSH.length, -4).split(':').pop().split("/");
-    console.log(`owner: ${owner}, repo: ${repo}`);
-    return { owner, repo };
+    url_path_elements.push(...url.slice(repoSSH.length, -4).split(':').pop().split("/"));
   } else {
-    throw new Error(`Unsupported format: ${url}`);
+    throw new Error(`Unsupported format - not a valid HTTPS or SSH URL: ${url}`);
   }
+  
+  if (url_path_elements.length < 2) {
+    throw new Error(`Unsupported format - could not find owner and repo in path: ${url}`);
+  }
+
+  // The last two elements of any valid git remote URL path should be the owner and repo.
+  const {owner, repo} = url_path_elements.slice(-2);
+  return { owner, repo };
 }
