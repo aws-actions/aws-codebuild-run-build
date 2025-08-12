@@ -288,6 +288,13 @@ you must first `git checkout` the commit that you want to test.
 npx @aws-actions/codebuild-run-build -p ProjectName -r remoteName
 ```
 
+Note: If the above command returns a 404 error, you might need to add the package manually.
+```
+npm install git@github.com:aws-actions/aws-codebuild-run-build.git
+# OR
+yard add git@github.com:aws-actions/aws-codebuild-run-build.git
+```
+
 This will use whatever commit you have checked out
 and push to a temporary branch in the specified remote.
 Then kick off the build
