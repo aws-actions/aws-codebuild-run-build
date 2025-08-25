@@ -117,10 +117,10 @@ function deleteBranch(remote, branchName) {
 }
 
 function githubInfo(remote) {
-  const gitHubSSH = "git@github.com:";
-  const gitHubHTTPS = "https://github.com/";
+  const repoSSH = "git@";
+  const repoHTTPS = "https://";
   /* Expecting to match something like:
-   * 'fork    git@github.com:seebees/aws-codebuild-run-build.git (push)'
+   * 'fork    git@<hostname>:seebees/aws-codebuild-run-build.git (push)'
    * Which is the output of `git remote -v`
    */
   const remoteMatch = new RegExp(`^${remote}.*\\(push\\)$`);
@@ -137,13 +137,21 @@ function githubInfo(remote) {
     .filter((line) => line.trim().match(remoteMatch));
   assert(gitRemote, `No remote found named ${remote}`);
   const [, url] = gitRemote.split(/[\t ]/);
-  if (url.startsWith(gitHubHTTPS)) {
-    const [owner, repo] = url.slice(gitHubHTTPS.length, -4).split("/");
-    return { owner, repo };
-  } else if (url.startsWith(gitHubSSH)) {
-    const [owner, repo] = url.slice(gitHubSSH.length, -4).split("/");
-    return { owner, repo };
+  const url_path_elements = [];
+  
+  if (url.startsWith(repoHTTPS)) {
+    url_path_elements.push(...url.slice(repoHTTPS.length, -4).split("/"));
+  } else if (url.startsWith(repoSSH)) {
+    url_path_elements.push(...url.slice(repoSSH.length, -4).split(':').pop().split("/"));
   } else {
-    throw new Error(`Unsupported format: ${url}`);
+    throw new Error(`Unsupported format - not a valid HTTPS or SSH URL: ${url}`);
   }
+  
+  if (url_path_elements.length < 2) {
+    throw new Error(`Unsupported format - could not find owner and repo in path: ${url}`);
+  }
+
+  // The last two elements of any valid git remote URL path should be the owner and repo.
+  const {owner, repo} = url_path_elements.slice(-2);
+  return { owner, repo };
 }
