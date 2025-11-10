@@ -193,6 +193,7 @@ See the [GitHub Secrets docs][github secrets access] for more information.**
 The credentials that you provide need to have the following permissions:
 
 - `codebuild:StartBuild`
+- `codebuild:StopBuild`
 - `codebuild:BatchGetBuilds`
 - `logs:GetLogEvents`
 
@@ -204,7 +205,7 @@ For example:
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": ["codebuild:StartBuild", "codebuild:BatchGetBuilds"],
+      "Action": ["codebuild:StartBuild", "codebuild:StopBuild", "codebuild:BatchGetBuilds"],
       "Resource": ["arn:aws:codebuild:REGION:ACCOUNT_ID:project/PROJECT_NAME"]
     },
     {
