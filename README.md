@@ -285,7 +285,7 @@ In order to use this tool,
 you must first `git checkout` the commit that you want to test.
 
 ```
-npx @aws-actions/codebuild-run-build -p ProjectName -r remoteName
+npx github:aws-actions/aws-codebuild-run-build -p ProjectName -r remoteName
 ```
 
 Note: If the above command returns a 404 error, you might need to add the package manually.
