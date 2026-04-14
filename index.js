@@ -1,16 +1,13 @@
 // Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-const core = require("@actions/core");
-const { runBuild } = require("./code-build");
-const assert = require("assert");
+import * as core from "@actions/core";
+import { runBuild } from "./code-build.js";
+import assert from "node:assert";
 
-/* istanbul ignore next */
-if (require.main === module) {
-  run();
-}
+run();
 
-module.exports = run;
+export default run;
 
 async function run() {
   console.log("*****STARTING CODEBUILD*****");
