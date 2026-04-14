@@ -2,11 +2,12 @@
 // Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-const uuid = require("uuid/v4");
-const cp = require("child_process");
-const cb = require("./code-build");
-const assert = require("assert");
-const yargs = require("yargs");
+import { v4 as uuid } from "uuid";
+import cp from "node:child_process";
+import * as cb from "./code-build.js";
+import assert from "node:assert";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 
 const {
   projectName,
@@ -19,7 +20,7 @@ const {
   remote,
   updateInterval,
   updateBackOff,
-} = yargs
+} = yargs(hideBin(process.argv))
   .option("project-name", {
     alias: "p",
     describe: "AWS CodeBuild Project Name",
@@ -76,7 +77,8 @@ const {
       "Base update interval back-off value when encountering API rate-limiting",
     default: 15,
     type: "number",
-  }).argv;
+  })
+  .parse();
 
 const BRANCH_NAME = uuid();
 

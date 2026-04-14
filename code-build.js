@@ -1,13 +1,13 @@
 // Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-const core = require("@actions/core");
-const github = require("@actions/github");
-const { CloudWatchLogs } = require("@aws-sdk/client-cloudwatch-logs");
-const { CodeBuild } = require("@aws-sdk/client-codebuild");
-const assert = require("assert");
+import * as core from "@actions/core";
+import * as github from "@actions/github";
+import { CloudWatchLogs } from "@aws-sdk/client-cloudwatch-logs";
+import { CodeBuild } from "@aws-sdk/client-codebuild";
+import assert from "node:assert";
 
-module.exports = {
+export {
   runBuild,
   build,
   waitForBuildEndTime,
@@ -73,7 +73,7 @@ async function waitForBuildEndTime(
   seqEmptyLogs,
   totalEvents,
   throttleCount,
-  nextToken
+  nextToken,
 ) {
   const { codeBuild, cloudWatchLogs } = sdk;
 
@@ -114,7 +114,7 @@ async function waitForBuildEndTime(
     if (errObject.message && errObject.message.search("Rate exceeded") !== -1) {
       // We were rate-limited, so add backoff with Full Jitter, ref: https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
       let jitteredBackOff = Math.floor(
-        Math.random() * (updateBackOff * 2 ** throttleCount)
+        Math.random() * (updateBackOff * 2 ** throttleCount),
       );
       let newWait = updateInterval + jitteredBackOff;
       throttleCount++;
@@ -130,7 +130,7 @@ async function waitForBuildEndTime(
         seqEmptyLogs,
         totalEvents,
         throttleCount,
-        nextToken
+        nextToken,
       );
     } else {
       //The error returned from the API wasn't about rate limiting, so throw it as an actual error and fail the job
@@ -170,8 +170,8 @@ async function waitForBuildEndTime(
       resolve,
       current.endTime && throttleCount == 0
         ? updateInterval / 2
-        : updateInterval
-    )
+        : updateInterval,
+    ),
   );
 
   // Try again
@@ -182,16 +182,16 @@ async function waitForBuildEndTime(
     seqEmptyLogs,
     totalEvents,
     throttleCount,
-    nextForwardToken
+    nextForwardToken,
   );
 }
 
-function githubInputs() {
+function githubInputs(ctx = github.context) {
   const projectName = core.getInput("project-name", { required: true });
   const disableSourceOverride =
     core.getInput("disable-source-override", { required: false }) === "true";
-  const { owner, repo } = github.context.repo;
-  const { payload } = github.context;
+  const { owner, repo } = ctx.repo;
+  const { payload } = ctx;
   // The github.context.sha is evaluated on import.
   // This makes it hard to test.
   // So I use the raw ENV.
@@ -239,12 +239,12 @@ function githubInputs() {
   const updateInterval =
     parseInt(
       core.getInput("update-interval", { required: false }) || "30",
-      10
+      10,
     ) * 1000;
   const updateBackOff =
     parseInt(
       core.getInput("update-back-off", { required: false }) || "15",
-      10
+      10,
     ) * 1000;
 
   const hideCloudWatchLogs =
@@ -328,7 +328,7 @@ function inputs2Parameters(inputs) {
     .filter(
       ([key]) =>
         (!disableGithubEnvVars && key.startsWith("GITHUB_")) ||
-        envPassthrough.includes(key)
+        envPassthrough.includes(key),
     )
     .map(([name, value]) => ({ name, value, type: "PLAINTEXT" }));
 
@@ -363,7 +363,7 @@ function buildSdk() {
   ) {
     assert(
       codeBuild.config.credentials && cloudWatchLogs.config.credentials,
-      "No credentials. Try adding @aws-actions/configure-aws-credentials earlier in your job to set up AWS credentials."
+      "No credentials. Try adding @aws-actions/configure-aws-credentials earlier in your job to set up AWS credentials.",
     );
   }
 

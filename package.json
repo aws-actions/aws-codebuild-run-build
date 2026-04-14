@@ -2,45 +2,43 @@
   "name": "@aws-actions/codebuild-run-build",
   "version": "1.0.20",
   "description": "Execute CodeBuild::startBuild for the current repo.",
+  "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "lint": "prettier -c *.js *.json *.md test/*.js; eslint **.js test/**.js",
-    "format": "prettier --write -c *.js *.json *.md test/*.js; eslint --fix **.js test/**.js",
-    "format:check": "prettier --check -c *.js *.json *.md test/*.js; eslint --fix **.js test/**.js",
-    "package": "ncc build index.js -o dist",
-    "build": "ncc build index.js -o dist",
+    "lint": "prettier -c *.js *.json *.md test/*.js; eslint *.js test/*.js",
+    "format": "prettier --write -c *.js *.json *.md test/*.js; eslint --fix *.js test/*.js",
+    "format:check": "prettier --check -c *.js *.json *.md test/*.js; eslint --fix *.js test/*.js",
+    "package": "esbuild index.js --bundle --platform=node --format=esm --outfile=dist/index.js --banner:js=\"import{createRequire}from'module';const require=createRequire(import.meta.url);\"",
+    "build": "esbuild index.js --bundle --platform=node --format=esm --outfile=dist/index.js --banner:js=\"import{createRequire}from'module';const require=createRequire(import.meta.url);\"",
     "test": "mocha"
   },
   "author": "aws-crypto-tools-team@amazon.com",
   "license": "Apache-2.0",
   "dependencies": {
-    "@actions/core": "^1.10.0",
-    "@actions/exec": "^1.0.3",
-    "@actions/github": "^8.0.1",
+    "@actions/core": "^3.0.0",
+    "@actions/github": "^9.1.0",
     "@aws-sdk/client-cloudwatch-logs": "^3.441.0",
     "@aws-sdk/client-codebuild": "^3.444.0",
-    "uuid": "^3.4.0",
-    "yargs": "^15.3.1"
+    "uuid": "^13.0.0",
+    "yargs": "^18.0.0"
   },
   "bin": "./local.js",
   "files": [
-    "*.js"
+    "dist",
+    "action.yml"
   ],
   "devDependencies": {
-    "@vercel/ncc": "^0.36.1",
-    "chai": "^4.2.0",
-    "eslint": "^8.43.0",
-    "eslint-config-prettier": "^6.10.1",
-    "husky": "^8.0.3",
-    "lint-staged": "^13.2.1",
+    "@eslint/js": "^10.0.1",
+    "chai": "^6.2.2",
+    "esbuild": "^0.28.0",
+    "eslint": "^10.2.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.5.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "mocha": "^11.7.5",
     "mocha-each": "^2.0.1",
-    "prettier": "^2.0.4"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
+    "prettier": "^3.8.2"
   },
   "lint-staged": {
     "*.js": [
@@ -55,7 +53,6 @@
     "mocha": {
       "diff": "^8.0.3",
       "serialize-javascript": "^7.0.5"
-    },
-    "minimatch": "^9.0.5"
+    }
   }
 }

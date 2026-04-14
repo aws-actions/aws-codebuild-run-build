@@ -277,32 +277,20 @@ this will overwrite them.
 ### Running Locally
 
 It can be useful to run a build outside of CI.
-So, this action can also be installed locally
-to kick off a CodeBuild project from your git sandbox.
-You could push your changes to an open PR,
-but if you only want to test one project this may be faster.
-In order to use this tool,
-you must first `git checkout` the commit that you want to test.
+This action can be installed locally to kick off a CodeBuild project from your git sandbox.
+You must first `git checkout` the commit that you want to test.
 
 ```
-npx github:aws-actions/aws-codebuild-run-build -p ProjectName -r remoteName
-```
-
-Note: If the above command returns a 404 error, you might need to add the package manually.
-
-```
-npm install git@github.com:aws-actions/aws-codebuild-run-build.git
-# OR
-yard add git@github.com:aws-actions/aws-codebuild-run-build.git
+git clone git@github.com:aws-actions/aws-codebuild-run-build.git
+cd aws-codebuild-run-build
+npm ci
+node local.js -p ProjectName -r remoteName
 ```
 
 This will use whatever commit you have checked out
 and push to a temporary branch in the specified remote.
 Then kick off the build
 and delete the remote branch when complete.
-
-You can also install the project globally or locally
-and execute it that way.
 
 ## Implementation Notes
 
@@ -354,7 +342,7 @@ If you find that these options don't meet your needs, please open an issue to le
 
 By creating a new Release a workflow is triggered creating a new commit which only contains `dist` and the `action.yml`. The necessary tags, i.e. for the release v1.0.7, the tag v1.0.7 is created and the v1.0 and v1 tags are updated.
 
-For the tagging and building the [build-and-tag](https://github.com/JasonEtco/build-and-tag-action) action by [Jason Etcovitch](https://github.com/JasonEtco) is used. It expects to have the main attribute and a build script to be set in the `package.json`. It then builds the code with the ncc compiler and creates the new tag/ updates existing tags for minor and major versions automatically.
+For the tagging and building the [build-and-tag](https://github.com/JasonEtco/build-and-tag-action) action by [Jason Etcovitch](https://github.com/JasonEtco) is used. It expects to have the main attribute and a build script to be set in the `package.json`. It then builds the code with esbuild and creates the new tag/ updates existing tags for minor and major versions automatically.
 
 ## License
 
