@@ -1,4 +1,11 @@
-**⚠️ For new projects, use the [CodeBuild-hosted GitHub Actions runner](https://docs.aws.amazon.com/codebuild/latest/userguide/action-runner.html) instead.**
+**⚠️ Recommended: Use the [CodeBuild-hosted GitHub Actions runner](https://docs.aws.amazon.com/codebuild/latest/userguide/action-runner.html) instead.**
+
+This action (`aws-codebuild-run-build`) predates CodeBuild's native GitHub Actions support and is now in maintenance-only mode. New users should configure their CodeBuild project as a self-hosted runner - it's plug-and-play GHA action runner.
+
+This project remains supported for existing users who rely on its `buildspec`-based  execution model, but **we are not accepting new features**. Security and dependency patches will continue to ship.
+
+
+---
 
 
 ## AWS CodeBuild Run Build for GitHub Actions
