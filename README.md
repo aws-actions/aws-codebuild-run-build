@@ -1,4 +1,4 @@
-** ⚠️ For new projects, use the [CodeBuild-hosted GitHub Actions runner](https://docs.aws.amazon.com/codebuild/latest/userguide/action-runner.html) instead.**
+**⚠️ For new projects, use the [CodeBuild-hosted GitHub Actions runner](https://docs.aws.amazon.com/codebuild/latest/userguide/action-runner.html) instead.**
 
 
 ## AWS CodeBuild Run Build for GitHub Actions
